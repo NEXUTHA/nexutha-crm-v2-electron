@@ -1,0 +1,73 @@
+{
+  "name": "nexutha-crm",
+  "version": "2.1.0",
+  "description": "NEXUTHA CRM - 完全ローカル型顧客管理システム",
+  "main": "main.js",
+  "author": "Yamashita Yasuhide / NEXUTHA",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^36.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "net.nexutha.crm",
+    "productName": "NEXUTHA CRM",
+    "copyright": "© 2026 Yamashita Yasuhide / NEXUTHA",
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "extraResources": [
+      {
+        "from": "../NEXUTHA-CRM-V2/backend",
+        "to": "backend"
+      },
+      {
+        "from": "../NEXUTHA-CRM-V2/index.html",
+        "to": "www/index.html"
+      },
+      {
+        "from": "../NEXUTHA-CRM-V2/style.css",
+        "to": "www/style.css"
+      },
+      {
+        "from": "../NEXUTHA-CRM-V2/js",
+        "to": "www/js"
+      },
+      {
+        "from": "../NEXUTHA-CRM-V2/manifest.json",
+        "to": "www/manifest.json"
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js"
+    ]
+  }
+}

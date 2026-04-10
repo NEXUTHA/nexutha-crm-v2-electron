@@ -452,7 +452,7 @@ async function renderCustomerDetail(c, customerId) {
   }
 
   // タグ
-  const tags = c.tags || [];
+  const tags = Array.isArray(c.tags) ? c.tags : (typeof c.tags === "string" && c.tags ? JSON.parse(c.tags) : []);
   const tagsEl = document.getElementById('detail-tags');
   if (tagsEl) {
     tagsEl.innerHTML = '<span style="font-size:10px;color:var(--text3);letter-spacing:1px;">タグ:</span>' +

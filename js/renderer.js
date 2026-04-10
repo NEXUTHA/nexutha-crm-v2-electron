@@ -575,7 +575,7 @@ async function renderDocuments() {
           ${Object.entries(statusMap).map(([k,v])=>`<option value="${k}" ${k===status?'selected':''}>${v}</option>`).join('')}
         </select>
       </td>
-      <td>
+      <td style="white-space:nowrap;">
         <button class="btn btn-ghost btn-sm" onclick="openEditDocModal(${d.id})" data-tip="書類を編集">編集</button>
         <button class="btn btn-ghost btn-sm" onclick="reissuePdf(${d.id})" data-tip="PDFを再生成してダウンロード">PDF</button>
         <button class="btn btn-ghost btn-sm" onclick="copyDoc(${d.id})" data-tip="この書類をコピーして新規作成">複製</button>

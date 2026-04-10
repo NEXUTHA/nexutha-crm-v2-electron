@@ -46,7 +46,7 @@
 })();
 </script>
 <script src="/js/state.js?v=2.1.0"></script>
-<script src="/js/renderer.js?v=2.1.0"></script>
+<script src="/js/renderer.js?v=2.1.1"></script>
 <script src="/js/pdf.js?v=2.1.0"></script>
 </head>
 <body>
@@ -546,7 +546,7 @@
             <th><input type="checkbox" id="doc-check-all" onchange="toggleAllDocChecks(this.checked)" style="accent-color:var(--gold);"></th>
             <th>書類番号</th><th>種別</th><th>顧客名</th>
             <th>発行日</th><th style="text-align:right;">金額</th>
-            <th>ステータス</th><th></th>
+            <th>ステータス</th><th style="min-width:320px;"></th>
           </tr></thead>
           <tbody id="doc-list-body"></tbody>
         </table>
@@ -2661,23 +2661,6 @@ async function uploadMeishi(input) {
   } catch(e) {
     handleError(e, 'uploadMeishiでエラーが発生しました');
   }}
-
-
-function viewMeishiData(dataUrl) {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:999999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
-  overlay.onclick = () => overlay.remove();
-  overlay.innerHTML = `<img src="${dataUrl}" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">`;
-  document.body.appendChild(overlay);
-}
-
-async function deleteMeishiFile(fileId) {
-  showConfirm('この名刺を削除しますか？', async () => {
-    await fetch(`${API_BASE}/files/${fileId}`, { method: 'DELETE' });
-    await renderDetailMeishi(detailCustomerId);
-    showToast('削除しました');
-  });
-}
 
 
 function viewMeishiData(dataUrl) {

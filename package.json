@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "electron": "^36.0.0",
-    "electron-builder": "^26.0.0"
+    "electron-builder": "^26.8.1"
   },
   "build": {
     "appId": "net.nexutha.crm",
@@ -45,24 +45,36 @@
     },
     "extraResources": [
       {
-        "from": "../NEXUTHA-CRM-V2/backend",
+        "from": "dist/backend",
         "to": "backend"
       },
       {
-        "from": "../NEXUTHA-CRM-V2/index.html",
-        "to": "www/index.html"
+        "from": "index.html",
+        "to": "index.html"
       },
       {
-        "from": "../NEXUTHA-CRM-V2/style.css",
-        "to": "www/style.css"
+        "from": "style.css",
+        "to": "style.css"
       },
       {
-        "from": "../NEXUTHA-CRM-V2/js",
-        "to": "www/js"
+        "from": "js",
+        "to": "js"
       },
       {
-        "from": "../NEXUTHA-CRM-V2/manifest.json",
-        "to": "www/manifest.json"
+        "from": "manifest.json",
+        "to": "manifest.json"
+      },
+      {
+        "from": "sw.js",
+        "to": "sw.js"
+      },
+      {
+        "from": "favicon.ico",
+        "to": "favicon.ico"
+      },
+      {
+        "from": "version.json",
+        "to": "version.json"
       }
     ],
     "files": [

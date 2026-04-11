@@ -1,4 +1,5 @@
-const { app, BrowserWindow, shell, Menu } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, globalShortcut } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
@@ -53,6 +54,9 @@ function waitForServer(callback, retries = 60) {
 }
 
 function createWindow() {
+  // 開発時のキャッシュ無効化
+  const { session } = require('electron');
+  if (!app.isPackaged) session.defaultSession.clearCache();
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -69,6 +73,7 @@ function createWindow() {
 
 
   mainWindow.loadURL(`http://localhost:${PORT}`);
+  mainWindow.webContents.openDevTools(); // デバッグ用
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
@@ -86,6 +91,58 @@ function createWindow() {
     ]);
     contextMenu.popup();
   });
+}
+
+// ================================================================
+// 自動アップデート設定
+// ================================================================
+function setupAutoUpdater() {
+  // ログ出力
+  autoUpdater.logger = require('electron').app ? console : null;
+
+  autoUpdater.on('checking-for-update', () => {
+    console.log('アップデート確認中...');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('アップデートあり:', info.version);
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'アップデートあり',
+      message: `NEXUTHA CRM v${info.version} が利用可能です。ダウンロードします...`,
+      buttons: ['OK']
+    });
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    console.log('最新版です');
+  });
+
+  autoUpdater.on('download-progress', (progress) => {
+    console.log(`ダウンロード中: ${Math.round(progress.percent)}%`);
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'アップデート準備完了',
+      message: `v${info.version} のインストール準備ができました。再起動して適用しますか？`,
+      buttons: ['今すぐ再起動', 'あとで']
+    }).then(result => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('アップデートエラー:', err.message);
+  });
+
+  // 起動時にアップデートチェック（配布版のみ）
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdates();
+  }
 }
 
 app.whenReady().then(() => {
@@ -110,7 +167,13 @@ app.whenReady().then(() => {
   waitForServer(() => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+      setupAutoUpdater();
     }
+  });
+
+  // Cmd+Option+I でDevToolsを開閉
+  globalShortcut.register('CommandOrControl+Alt+I', () => {
+    if (mainWindow) mainWindow.webContents.toggleDevTools();
   });
 });
 

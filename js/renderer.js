@@ -452,7 +452,11 @@ async function renderCustomerDetail(c, customerId) {
   }
 
   // タグ
-  const tags = Array.isArray(c.tags) ? c.tags : (typeof c.tags === "string" && c.tags ? JSON.parse(c.tags) : []);
+  let tags = c.tags;
+  try {
+    while (typeof tags === "string") tags = JSON.parse(tags);
+    if (!Array.isArray(tags)) tags = [];
+  } catch(e) { tags = []; }
   const tagsEl = document.getElementById('detail-tags');
   if (tagsEl) {
     tagsEl.innerHTML = '<span style="font-size:10px;color:var(--text3);letter-spacing:1px;">タグ:</span>' +
@@ -575,7 +579,7 @@ async function renderDocuments() {
           ${Object.entries(statusMap).map(([k,v])=>`<option value="${k}" ${k===status?'selected':''}>${v}</option>`).join('')}
         </select>
       </td>
-      <td style="white-space:nowrap;">
+      <td style="white-space:nowrap;min-width:380px;">
         <button class="btn btn-ghost btn-sm" onclick="openEditDocModal(${d.id})" data-tip="書類を編集">編集</button>
         <button class="btn btn-ghost btn-sm" onclick="reissuePdf(${d.id})" data-tip="PDFを再生成してダウンロード">PDF</button>
         <button class="btn btn-ghost btn-sm" onclick="copyDoc(${d.id})" data-tip="この書類をコピーして新規作成">複製</button>

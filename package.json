@@ -80,6 +80,14 @@
     "files": [
       "main.js",
       "preload.js"
-    ]
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "NEXUTHA",
+      "repo": "nexutha-crm-v2-electron"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3"
   }
 }

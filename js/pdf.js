@@ -145,7 +145,7 @@ async function generatePDF_html2canvas(docData, customer) {
 
   const el = document.createElement('div');
   el.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#fff;color:#000;font-family:"Noto Sans JP",sans-serif;font-size:13px;padding:48px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;';
-  await generatePdfHtml(el, docData, customer, company);
+  await generatePdfHtml(el, docData, customer, window.APP.company);
   // プレビューで設定した画像配置を反映
   if (docData._imagePositions) {
     const pos = docData._imagePositions;

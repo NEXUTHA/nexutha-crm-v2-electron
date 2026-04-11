@@ -546,7 +546,7 @@
             <th><input type="checkbox" id="doc-check-all" onchange="toggleAllDocChecks(this.checked)" style="accent-color:var(--gold);"></th>
             <th>書類番号</th><th>種別</th><th>顧客名</th>
             <th>発行日</th><th style="text-align:right;">金額</th>
-            <th>ステータス</th><th style="min-width:320px;"></th>
+            <th style="width:120px;">ステータス</th><th style="min-width:380px;"></th>
           </tr></thead>
           <tbody id="doc-list-body"></tbody>
         </table>
@@ -2275,7 +2275,8 @@ async function openEditModal(id) {
   const zipEl = document.getElementById('f-zip'); if (zipEl) zipEl.value = c.zip || '';
   document.getElementById('f-memo').value    = c.memo || '';
   // タグをチェックボックスに反映
-  const tags = c.tags || [];
+  let tags = c.tags;
+  try { while (typeof tags === "string") tags = JSON.parse(tags); if (!Array.isArray(tags)) tags = []; } catch(e) { tags = []; }
   ['vip', 'caution', 'sleep', 'new'].forEach(id => {
     const el = document.getElementById('f-tag-' + id);
     if (el) el.checked = false;
@@ -2519,7 +2520,8 @@ async function addCustomerTag(tag) {
   const c = await NAPI.getCustomer(detailCustomerId);
   if (!c) return;
   const dec = _decRecord(c);
-  const tags = dec.tags || [];
+  let tags = dec.tags;
+  try { while (typeof tags === "string") tags = JSON.parse(tags); if (!Array.isArray(tags)) tags = []; } catch(e) { tags = []; }
   if (tags.includes(tag)) { showToast('既に追加されています'); return; }
   tags.push(tag);
   dec.tags = tags;

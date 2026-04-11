@@ -1449,3 +1449,37 @@ label, .form-label, .detail-label {
    Tooltip System
    ================================================================ */
 [data-tip] { position: relative; }
+
+/* 書類一覧ホバーアクション */
+#doc-list-body tr .doc-actions { opacity: 0; transition: opacity 0.15s; }
+#doc-list-body tr:hover .doc-actions { opacity: 1; }
+.doc-dropdown { position: relative; display: inline-block; }
+.doc-dropdown-menu {
+  display: none;
+  position: fixed;
+  right: auto;
+  top: auto;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  z-index: 9999;
+  min-width: 160px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  padding: 4px 0;
+}
+.doc-dropdown-menu.open { display: block; }
+.doc-dropdown-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.doc-dropdown-menu button:hover { background: var(--gold-pale); color: var(--gold); }
+.doc-dropdown-menu .danger { color: #e55; }
+.doc-dropdown-menu .danger:hover { background: rgba(220,50,50,0.1); color: #e55; }

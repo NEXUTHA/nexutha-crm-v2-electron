@@ -579,15 +579,21 @@ async function renderDocuments() {
           ${Object.entries(statusMap).map(([k,v])=>`<option value="${k}" ${k===status?'selected':''}>${v}</option>`).join('')}
         </select>
       </td>
-      <td style="white-space:nowrap;min-width:380px;">
-        <button class="btn btn-ghost btn-sm" onclick="openEditDocModal(${d.id})" data-tip="書類を編集">編集</button>
-        <button class="btn btn-ghost btn-sm" onclick="reissuePdf(${d.id})" data-tip="PDFを再生成してダウンロード">PDF</button>
-        <button class="btn btn-ghost btn-sm" onclick="copyDoc(${d.id})" data-tip="この書類をコピーして新規作成">複製</button>
-        ${d.type === 'estimate' ? `<button class="btn btn-outline btn-sm" onclick="convertToInvoice(${d.id})" data-tip="見積書から請求書を作成">請求書化</button>` : ''}
-        ${d.type === 'estimate' ? `<button class="btn btn-outline btn-sm" onclick="convertToReceipt(${d.id})" data-tip="見積書から領収書を作成">領収書化</button>` : ''}
-        ${d.type === 'invoice' ? `<button class="btn btn-outline btn-sm" onclick="convertToReceipt(${d.id})" data-tip="請求書から領収書を作成">領収書化</button>` : ''}
-        <button class="btn btn-ghost btn-sm" onclick="showDocVersions(${d.id})" data-tip="版履歴">📋</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})">削除</button>
+      <td style="white-space:nowrap;min-width:180px;">
+        <div class="doc-actions" style="display:flex;gap:4px;align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="openEditDocModal(${d.id})" data-tip="編集">✏️</button>
+          <button class="btn btn-ghost btn-sm" onclick="reissuePdf(${d.id})" data-tip="PDF生成">📄</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyDoc(${d.id})" data-tip="複製">📋</button>
+          <div class="doc-dropdown">
+            <button class="btn btn-ghost btn-sm" onclick="toggleDocDropdown(event,${d.id})" data-tip="その他">・・・</button>
+            <div id="doc-dropdown-${d.id}" class="doc-dropdown-menu">
+              ${d.type === 'estimate' ? `<button onclick="convertToInvoice(${d.id})">📑 請求書化</button>` : ''}
+              ${d.type === 'estimate' || d.type === 'invoice' ? `<button onclick="convertToReceipt(${d.id})">🧾 領収書化</button>` : ''}
+              <button onclick="showDocVersions(${d.id})">🕐 版履歴</button>
+              <button class="danger" onclick="deleteDoc(${d.id})">🗑️ 削除</button>
+            </div>
+          </div>
+        </div>
       </td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px;">書類がありません</td></tr>';
@@ -803,3 +809,21 @@ function safeHtml(el, html) {
   if (el) el.innerHTML = html;
 }
 
+
+// 書類ドロップダウンメニュー
+function toggleDocDropdown(event, docId) {
+  event.stopPropagation();
+  document.querySelectorAll('.doc-dropdown-menu.open').forEach(el => el.classList.remove('open'));
+  const menu = document.getElementById(`doc-dropdown-${docId}`);
+  if (!menu) return;
+  const btn = event.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + window.scrollY) + 'px';
+  menu.style.left = (rect.right - 160) + 'px';
+  menu.classList.toggle('open');
+}
+
+// クリックで閉じる
+document.addEventListener('click', () => {
+  document.querySelectorAll('.doc-dropdown-menu.open').forEach(el => el.classList.remove('open'));
+});

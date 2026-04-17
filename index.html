@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <link rel="manifest" href="manifest.json">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://cdnjs.cloudflare.com http://localhost:8083 https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com; font-src 'self' https://fonts.gstatic.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://cdnjs.cloudflare.com http://localhost:9876 https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://huggingface.co/mlc-ai/ blob:; font-src 'self' https://fonts.gstatic.com;">
   <meta name="viewport"  content="width=device-width, initial-scale=1.0">
 <title>NEXUTHA CRM</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
@@ -1070,6 +1070,54 @@
         <span id="pc-save-msg-m" style="display:none;color:var(--success);font-size:12px;margin-left:12px;"></span>
       </div>
     </div>
+
+      <div class="settings-accordion" id="acc-ai">
+        <div class="settings-accordion-header" onclick="toggleAccordion(this)">
+          <div><div class="acc-title">🤖 AIアシスタント</div><div class="acc-desc">ローカルAIプラグインを選択・インストール</div></div>
+          <span class="acc-icon">▼</span>
+        </div>
+        <div class="settings-accordion-body">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">お使いのPCスペックに合わせてAIを選択してください。初回のみダウンロードが必要です。</div>
+          <div style="display:grid;gap:12px;">
+            <div class="ai-plugin-card" data-level="1" data-model="Llama-3.2-1B-Instruct-q4f32_1-MLC" onclick="installAI(this)" title="古いPCでも動く超軽量AI。基本的な質問に答えられます。容量：約700MB">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;color:var(--text);">LEVEL 1 · LITE</div><div style="font-size:11px;color:var(--text3);">Llama-3.2-1B · 約700MB · 古いPCでも動作</div></div>
+                <button class="btn btn-outline btn-sm ai-install-btn">起動</button>
+              </div>
+            </div>
+            <div class="ai-plugin-card" data-level="2" data-model="Llama-3.2-3B-Instruct-q4f32_1-MLC" onclick="installAI(this)" title="普通のPCで動く標準AI。日常会話レベルの返答ができます。容量：約2GB">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;color:var(--text);">LEVEL 2 · STANDARD</div><div style="font-size:11px;color:var(--text3);">Llama-3.2-3B · 約2GB · 8GB RAM以上推奨</div></div>
+                <button class="btn btn-outline btn-sm ai-install-btn">起動</button>
+              </div>
+            </div>
+            <div class="ai-plugin-card" data-level="3" data-model="Llama-3.1-8B-Instruct-q4f32_1-MLC" onclick="installAI(this)" title="M1Mac以上推奨。ビジネス実用レベルの返答ができます。容量：約5GB">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;color:var(--text);">LEVEL 3 · PRO</div><div style="font-size:11px;color:var(--text3);">Llama-3.1-8B · 約5GB · 16GB RAM以上推奨</div></div>
+                <button class="btn btn-outline btn-sm ai-install-btn">起動</button>
+              </div>
+            </div>
+            <div class="ai-plugin-card" data-level="4" data-model="Llama-3.3-70B-Instruct-q4f32_1-MLC" onclick="installAI(this)" title="M3 Max・48GB以上推奨。ほぼChatGPTレベルの返答ができます。容量：約40GB">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;color:var(--text);">LEVEL 4 · ULTRA</div><div style="font-size:11px;color:var(--text3);">Llama-3.3-70B · 約40GB · M3 Max推奨</div></div>
+                <button class="btn btn-outline btn-sm ai-install-btn">起動</button>
+              </div>
+            </div>
+            <div class="ai-plugin-card" data-level="5" onclick="installAI(this)" title="クラウドAI。全PCで動作。インターネット接続が必要です。従量課金。">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:13px;font-weight:600;color:var(--text);">LEVEL 5 · CLOUD</div><div style="font-size:11px;color:var(--text3);">OpenAI API · 全PC対応 · 通信必要</div></div>
+                <button class="btn btn-outline btn-sm ai-install-btn">設定</button>
+              </div>
+            </div>
+          </div>
+          <div id="ai-status" style="margin-top:12px;font-size:12px;color:var(--text2);"></div>
+          <div id="ai-progress-wrap" style="display:none;margin-top:8px;">
+            <div style="width:100%;height:6px;background:var(--border);border-radius:3px;">
+              <div id="ai-progress-bar" style="height:6px;background:var(--gold);border-radius:3px;width:0%;transition:width 0.3s;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
     <!-- スマホ表示：iOSスタイルリスト -->
     <div class="settings-mobile">
@@ -4361,7 +4409,7 @@ function handleUserInput() {
   }
 
   if (wizard.mode === 'add') {
-    if (wizard.step === 4) {
+    if (wizard.step === 4 || wizard.step === 5) {
       const phase = wizard.data._addrPhase;
       if (phase === 'zip') { handleZipInput(val); return; }
       if (phase === 'street') { handleStreetInput(val); return; }
@@ -4396,6 +4444,13 @@ function handleUserInput() {
       if (phase === 'room') { handleRoomInput(val); return; }
     }
     nextEditStep(val);
+    return;
+  }
+
+  if (wizard.mode === 'chat') {
+    if (window.electronAPI && window.electronAPI.openAI) {
+      window.electronAPI.openAI('Llama-3.2-1B-Instruct-q4f32_1-MLC');
+    }
     return;
   }
 
@@ -5132,6 +5187,86 @@ function loadAccentColor() {
   } catch(e) {}
 }
 
+
+// ================================================================
+// ローカルAI連携
+// ================================================================
+let _localAIEngine = null;
+let _localAILoading = false;
+
+async function askLocalAI(userMessage) {
+  try { showThinking(); } catch(e) {}
+
+  // エンジン未初期化の場合は起動
+  if (!_localAIEngine && !_localAILoading) {
+    _localAILoading = true;
+    try {
+      const webllm = await import('./node_modules/@mlc-ai/web-llm/lib/index.js');
+      addMsg('ai', 'AIを初期化中です。しばらくお待ちください...');
+      _localAIEngine = await webllm.CreateMLCEngine('Llama-3.2-1B-Instruct-q4f32_1-MLC', {
+        initProgressCallback: (p) => {
+          const status = document.getElementById('ai-thinking');
+          if (status) status.textContent = p.text;
+        }
+      });
+      _localAILoading = false;
+    } catch(e) {
+      hideThinking();
+      addMsg('ai', 'AI初期化に失敗しました。設定画面でAIをインストールしてください。');
+      _localAILoading = false;
+      return;
+    }
+  }
+
+  if (_localAILoading) {
+    hideThinking();
+    addMsg('ai', 'AIを準備中です。少し待ってから再度お試しください。');
+    return;
+  }
+
+  try {
+    const reply = await _localAIEngine.chat.completions.create({
+      messages: [
+        { role: 'system', content: 'あなたはNEXUTHA CRMのサポートAIです。顧客管理・見積書・請求書・領収書の操作について日本語で丁寧に答えてください。' },
+        { role: 'user', content: userMessage }
+      ],
+      stream: false,
+    });
+    hideThinking();
+    addMsg('ai', reply.choices[0].message.content);
+  } catch(e) {
+    hideThinking();
+    addMsg('ai', 'エラーが発生しました: ' + e.message);
+  }
+}
+
+// ================================================================
+// AIプラグイン
+// ================================================================
+function installAI(card) {
+  const model = card.dataset.model;
+  const level = card.dataset.level;
+  if (level == "5") {
+    alert("CLOUD版は今後実装予定です。");
+    return;
+  }
+  if (!model) return;
+  window.electronAPI ? window.electronAPI.openAI(model) : openAIWindow(model);
+}
+
+function openAIWindow(model) {
+  const status = document.getElementById("ai-status");
+  const progressWrap = document.getElementById("ai-progress-wrap");
+  const progressBar = document.getElementById("ai-progress-bar");
+  if (status) status.textContent = "AIウィンドウを開いています...";
+  if (window.require) {
+    const { ipcRenderer } = window.require("electron");
+    ipcRenderer.send("open-ai-window", model);
+  } else {
+    alert("Electronで起動してください。");
+  }
+}
+
 function toggleAccordion(el) {
   const acc = el.closest('.settings-accordion');
   if (!acc) return;
@@ -5570,7 +5705,7 @@ function loadContrast() {
 // NEXUTHA API Bridge Layer
 // IndexedDB → バックエンドAPI への橋渡し
 // ================================================================
-const API_BASE = 'http://localhost:8083/api';
+const API_BASE = 'http://localhost:9876/api';
 const USE_BACKEND = true; // falseにするとIndexedDBモードに戻る
 
 const NAPI = {

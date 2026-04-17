@@ -1,5 +1,5 @@
-const { contextBridge } = require('electron');
-// 必要に応じてAPIを公開
+const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
-  platform: process.platform
+  platform: process.platform,
+  openAI: (model) => ipcRenderer.send('open-ai-window', model)
 });

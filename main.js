@@ -94,6 +94,32 @@ function createWindow() {
 }
 
 // ================================================================
+// AIチャットウィンドウ
+// ================================================================
+let aiWindow = null;
+
+function createAIWindow(model) {
+  const modelName = model || 'Llama-3.2-1B-Instruct-q4f32_1-MLC';
+  if (aiWindow) {
+    aiWindow.close();
+    aiWindow = null;
+  }
+  aiWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    title: "NEXUTHA AI",
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+  aiWindow.loadFile(path.join(__dirname, "ai-chat.html"), {
+    query: { model: modelName }
+  });
+  aiWindow.on("closed", () => { aiWindow = null; });
+}
+
+// ================================================================
 // 自動アップデート設定
 // ================================================================
 function setupAutoUpdater() {
@@ -174,6 +200,17 @@ app.whenReady().then(() => {
   // Cmd+Option+I でDevToolsを開閉
   globalShortcut.register('CommandOrControl+Alt+I', () => {
     if (mainWindow) mainWindow.webContents.toggleDevTools();
+  });
+
+  // Cmd+Shift+A でAIチャットを開く
+  // IPCでAIウィンドウを開く
+  const { ipcMain } = require("electron");
+  ipcMain.on("open-ai-window", (event, model) => {
+    createAIWindow(model);
+  });
+
+  globalShortcut.register("CommandOrControl+Shift+A", () => {
+    createAIWindow();
   });
 });
 

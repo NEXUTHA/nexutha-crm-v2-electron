@@ -105,9 +105,12 @@ function createAIWindow(model) {
     aiWindow = null;
   }
   aiWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 460,
+    height: 700,
     title: "NEXUTHA AI",
+    resizable: true,
+    minimizable: true,
+    maximizable: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

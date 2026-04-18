@@ -3767,8 +3767,39 @@ function startChat() {
     { label:'見積書の作り方',     action:()=>{ addMsg('user','見積書の作り方'); addMsg('ai','「見積書を作成」を押して顧客を選択。\n書類番号・日付・明細（品目/数量/単価）・備考を順に入力します。\n確認後PDFが自動生成されます。'); } },
     { label:'請求書の作り方',     action:()=>{ addMsg('user','請求書の作り方'); addMsg('ai','「請求書」タブを選択して顧客・明細を入力します。\n支払期限・振込先がデフォルトでONになります。\n見積書から「請求書化」ボタンでも作成できます。'); } },
     { label:'データが消えないか', action:()=>{ addMsg('user','データが消えないか'); addMsg('ai','データはサーバー（SQLite）に安全に保存されています。\n定期的に設定画面の「バックアップを作成」でJSONを保存してください。'); } },
-    { label:'メニューへ',         action:()=>showWelcome() },
+    { label:'🤖 AIチャットで相談する', action:()=>showChatModelSelect() },
+    { label:'メニューへ', action:()=>showWelcome() },
   ]);
+}
+
+function _startChatWithModel() {
+  const models = [
+    { label:'LEVEL 1 · LITE（約700MB）',     model:'Llama-3.2-1B-Instruct-q4f32_1-MLC' },
+    { label:'LEVEL 2 · STANDARD（約2GB）',   model:'Llama-3.2-3B-Instruct-q4f32_1-MLC' },
+    { label:'LEVEL 3 · PRO（約5GB）',        model:'Llama-3.1-8B-Instruct-q4f32_1-MLC' },
+    { label:'LEVEL 4 · ULTRA（約40GB）',     model:'Llama-3.3-70B-Instruct-q4f32_1-MLC' },
+  ];
+  addMsg('ai', '使用するAIモデルを選択してください。\n<span style="color:var(--text3);font-size:11px;">ダウンロード済みのモデルをお選びください。</span>',
+    models.map(m => ({
+      label: m.label,
+      action: () => {
+        addMsg('user', m.label);
+        if (window.electronAPI) window.electronAPI.openAI(m.model);
+        addMsg('ai', m.label + ' を起動しました。\nAIチャットウィンドウで会話できます。\n\n使い方について質問することもできます。', [
+          { label:'顧客登録の仕方',     action:()=>{ addMsg('user','顧客登録の仕方'); addMsg('ai','「顧客を登録」ボタンを押すと順番に質問します。\n顧客名→業種→会社名→電話→メール→住所→メモ の順に入力。\n全項目スキップ可能です。'); } },
+          { label:'見積書の作り方',     action:()=>{ addMsg('user','見積書の作り方'); addMsg('ai','「見積書を作成」を押して顧客を選択。\n書類番号・日付・明細を入力します。\n確認後PDFが自動生成されます。'); } },
+          { label:'請求書の作り方',     action:()=>{ addMsg('user','請求書の作り方'); addMsg('ai','「請求書」タブを選択して顧客・明細を入力します。\n支払期限・振込先がデフォルトでONになります。'); } },
+          { label:'データが消えないか', action:()=>{ addMsg('user','データが消えないか'); addMsg('ai','データはサーバー（SQLite）に安全に保存されています。\n定期的にバックアップを作成してください。'); } },
+          { label:'モデルを変更',       action:()=>showChatModelSelect() },
+          { label:'メニューへ',         cls:'wbtn-skip', action:()=>showWelcome() },
+        ]);
+      }
+    })).concat([{ label:'メニューへ', cls:'wbtn-skip', action:()=>showWelcome() }])
+  );
+}
+
+function showChatModelSelect() {
+  _startChatWithModel();
 }
 
 // ================================================================

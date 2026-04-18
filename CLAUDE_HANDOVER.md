@@ -132,6 +132,13 @@ AIチャット機能：
 - GitHub 2段階認証設定済み
 - Apple Developer Program加入済み（アクティベーション待ち）
 
+- PUT /api/documents/{doc_id}がGET /{filename:path}に埋もれていた致命的バグ修正（保存・PDF出力が全く動いていなかった）
+- GET /api/documents/{doc_id}の重複定義バグ修正
+- アーカイブ機能のd.id変数展開漏れバグ修正
+- 書類履歴タブを商談グループ表示に変更（取引APIをフロントに実装）
+- 書類削除・複製・領収書化後にタブが維持されるよう修正
+- 書類作成ボタンで書類作成画面に直接遷移・顧客自動選択するよう修正
+
 ### 残タスク（販売前必須）
 1. Apple Developer Programのアクティベーション確認（待機中・最長48時間）
 2. 公証（Notarization）設定

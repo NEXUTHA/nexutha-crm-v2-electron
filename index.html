@@ -5108,7 +5108,7 @@ async function archiveOldDocuments() {
   if (!old.length) { showToast('アーカイブ対象なし（2年以上前の書類がありません）'); return; }
   showConfirm(`${old.length}件の書類をアーカイブしますか？\n（2年以上前の書類）`, async () => {
   for (const d of old) {
-    await fetch(`${API_BASE}/documents/d.id/status`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'archived'})});
+    await fetch(`${API_BASE}/documents/${d.id}/status`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'archived'})});
   }
   await loadDocuments();
   renderDocuments();

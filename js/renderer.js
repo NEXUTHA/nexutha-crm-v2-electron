@@ -827,3 +827,107 @@ function toggleDocDropdown(event, docId) {
 document.addEventListener('click', () => {
   document.querySelectorAll('.doc-dropdown-menu.open').forEach(el => el.classList.remove('open'));
 });
+
+// ================================================================
+// 商談グループ表示（書類履歴タブ）
+// ================================================================
+async function renderDetailDocsGrouped(customerId, docs) {
+  const docsEl = document.getElementById('detail-docs');
+  if (!docsEl) return;
+  if (docs.length === 0) {
+    docsEl.innerHTML = '<span style="color:var(--text3);">書類なし</span>';
+    return;
+  }
+
+  const typeMap = {estimate:'見積書', invoice:'請求書', receipt:'領収書'};
+  const badgeMap = {estimate:'badge-blue', invoice:'badge-orange', receipt:'badge-green'};
+  const statusMap = {draft:'下書き', sent:'送付済', paid:'入金済', cancelled:'ｷｬﾝｾﾙ'};
+  const statusColor = {draft:'var(--text3)', sent:'var(--gold)', paid:'#34d399', cancelled:'#f87171'};
+  const txStatusMap = {open:'進行中', closed:'完了', cancelled:'ｷｬﾝｾﾙ'};
+  const txStatusColor = {open:'var(--gold)', closed:'#34d399', cancelled:'#f87171'};
+
+  // transaction_idでグループ化
+  const groups = {};
+  docs.forEach(d => {
+    const key = d.transaction_id || ('_solo_' + d.id);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(d);
+  });
+
+  // 取引情報を取得
+  let transactions = [];
+  try {
+    const res = await fetch(`${API_BASE}/transactions/customer/${customerId}`);
+    if (res.ok) transactions = await res.json();
+  } catch(e) {}
+  const txById = {};
+  transactions.forEach(t => { txById[t.id] = t; });
+
+  const docRow = d => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 8px 7px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:4px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span class="badge ${badgeMap[d.type]||'badge-blue'}">${typeMap[d.type]||d.type}</span>
+        <span style="font-size:13px;">${d.doc_number}</span>
+        <span style="color:var(--text3);font-size:12px;">${d.doc_date}</span>
+        <span style="color:var(--gold);font-size:13px;">¥${(d.total||0).toLocaleString()}</span>
+        <span style="font-size:11px;color:${statusColor[d.status||'draft']}">${statusMap[d.status||'draft']}</span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="reissuePdf(${d.id})" data-tip="PDFを再生成">PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyDoc(${d.id})" data-tip="複製して新規作成">複製</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyMailTemplate('${d.type}','${d.customer_name||''}','${d.doc_number||''}',${d.total||0},'${d.payment_due||''}')" data-tip="メール文面をクリップボードにコピー">📧</button>
+        ${d.type === 'estimate' ? `<button class="btn btn-outline btn-sm" onclick="convertToInvoice(${d.id})">請求書化</button>` : ''}
+        ${d.type === 'estimate' || d.type === 'invoice' ? `<button class="btn btn-outline btn-sm" onclick="convertToReceipt(${d.id})">領収書化</button>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="showDocVersions(${d.id})">📋</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})">削除</button>
+      </div>
+    </div>`;
+
+  let html = '';
+  Object.keys(groups).forEach(key => {
+    const groupDocs = groups[key].sort((a,b) => a.created_at?.localeCompare(b.created_at||'')||0);
+    const txId = groupDocs[0].transaction_id;
+    const tx = txById[txId] || null;
+    const title = tx ? tx.title : (typeMap[groupDocs[0].type] || '書類');
+    const txStatus = tx ? tx.status : 'open';
+    const total = groupDocs.reduce((s,d) => s+(d.total||0), 0);
+    const statusLabel = txStatusMap[txStatus] || txStatus;
+    const statusClr = txStatusColor[txStatus] || 'var(--text3)';
+
+    html += `
+      <div style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:600;color:var(--text);">📁 ${title}</span>
+            <span style="font-size:11px;color:${statusClr};border:1px solid ${statusClr};border-radius:20px;padding:1px 8px;">${statusLabel}</span>
+            <span style="font-size:12px;color:var(--text3);">${groupDocs.length}件</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;color:var(--gold);font-weight:600;">¥${total.toLocaleString()}</span>
+            ${tx ? `
+            <select onchange="updateTxStatus(${tx.id}, this.value)" style="font-size:11px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:2px 4px;">
+              <option value="open" ${txStatus==='open'?'selected':''}>進行中</option>
+              <option value="closed" ${txStatus==='closed'?'selected':''}>完了</option>
+              <option value="cancelled" ${txStatus==='cancelled'?'selected':''}>ｷｬﾝｾﾙ</option>
+            </select>` : ''}
+          </div>
+        </div>
+        ${groupDocs.map(d => docRow(d)).join('')}
+      </div>`;
+  });
+
+  docsEl.innerHTML = html;
+}
+
+async function updateTxStatus(txId, status) {
+  try {
+    await fetch(`${API_BASE}/transactions/${txId}/status`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({status})
+    });
+    showToast('商談ステータスを更新しました');
+  } catch(e) {
+    showToast('更新に失敗しました');
+  }
+}

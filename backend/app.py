@@ -979,41 +979,10 @@ def export_backup():
         conn.close()
         raise HTTPException(status_code=500, detail=f"バックアップ取得失敗: {str(e)}")
 
-@app.get("/{filename:path}")
-def static_file(filename: str):
-    # APIパスは除外
-    if filename.startswith("api/"):
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Not found")
-    headers = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
-    file_path = STATIC_DIR / filename
-    if file_path.exists() and file_path.is_file():
-        return FileResponse(str(file_path), headers=headers)
-    # SPAフォールバック
-    return FileResponse(str(STATIC_DIR / "index.html"), headers=headers)
-
-init_db()
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=9876, reload=False)
 
 # ================================================================
 # 書類API追加
 # ================================================================
-@app.get("/api/documents/{doc_id}")
-def get_document(doc_id: int):
-    conn = get_db()
-    row = conn.execute("SELECT * FROM documents WHERE id = ?", (doc_id,)).fetchone()
-    conn.close()
-    if not row:
-        raise HTTPException(status_code=404, detail="書類が見つかりません")
-    d = dict(row)
-    d["items"] = json.loads(d["items"]) if d["items"] else []
-    d["bank_info"] = json.loads(d["bank_info"]) if d["bank_info"] else {}
-    d["versions"] = json.loads(d["versions"]) if d["versions"] else []
-    return d
-
 @app.put("/api/documents/{doc_id}")
 def update_document(doc_id: int, doc: DocumentUpdate):
     now = datetime.now().isoformat()
@@ -1077,4 +1046,21 @@ def update_document_status(doc_id: int, data: dict):
     conn.close()
     return {"message": "ステータス更新しました"}
 
+@app.get("/{filename:path}")
+def static_file(filename: str):
+    # APIパスは除外
+    if filename.startswith("api/"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Not found")
+    headers = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
+    file_path = STATIC_DIR / filename
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(str(file_path), headers=headers)
+    # SPAフォールバック
+    return FileResponse(str(STATIC_DIR / "index.html"), headers=headers)
 
+init_db()
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=9876, reload=False)

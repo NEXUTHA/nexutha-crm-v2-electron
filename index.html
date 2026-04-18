@@ -2466,39 +2466,9 @@ async function openDetail(customerId){
   const wrap = document.getElementById('detail-industry-wrap');
   if (wrap) wrap.innerHTML = industryBadgeHtml(c.industry);
 
-  // Documents for this customer
+  // Documents for this customer（商談グループ表示）
   const docs = await NAPI.getCustomerDocuments(customerId);
-  const docsEl = document.getElementById('detail-docs');
-  if (docsEl) {
-    if (docs.length === 0) {
-      docsEl.innerHTML = '<span style="color:var(--text3);">書類なし</span>';
-    } else {
-      const typeMap2 = {estimate:'見積書', invoice:'請求書', receipt:'領収書'};
-      const badgeMap2 = {estimate:'badge-blue', invoice:'badge-orange', receipt:'badge-green'};
-      const statusMap2 = {draft:'下書き', sent:'送付済', paid:'入金済', cancelled:'ｷｬﾝｾﾙ'};
-      const statusColor2 = {draft:'var(--text3)', sent:'var(--gold)', paid:'#34d399', cancelled:'#f87171'};
-      docsEl.innerHTML = docs.map(d => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:4px;">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span class="badge ${badgeMap2[d.type]||'badge-blue'}">${typeMap2[d.type]||d.type}</span>
-            <span style="font-size:13px;">${d.doc_number}</span>
-            <span style="color:var(--text3);font-size:12px;">${d.doc_date}</span>
-            <span style="color:var(--gold);font-size:13px;">¥${(d.total||0).toLocaleString()}</span>
-            <span style="font-size:11px;color:${statusColor2[d.status||'draft']}">${statusMap2[d.status||'draft']}</span>
-          </div>
-          <div style="display:flex;gap:4px;flex-wrap:wrap;">
-            <button class="btn btn-ghost btn-sm" onclick="reissuePdf(${d.id})" data-tip="PDFを再生成">PDF</button>
-            <button class="btn btn-ghost btn-sm" onclick="copyDoc(${d.id})" data-tip="複製して新規作成">複製</button>
-            <button class="btn btn-ghost btn-sm" onclick="copyMailTemplate('${d.type}','${d.customer_name||''}','${d.doc_number||''}',${d.total||0},'${d.payment_due||''}')" data-tip="メール文面をクリップボードにコピー">📧 メール</button>
-            ${d.type === 'estimate' ? `<button class="btn btn-outline btn-sm" onclick="convertToInvoice(${d.id})" data-tip="請求書を作成">請求書化</button>` : ''}
-            ${d.type === 'estimate' || d.type === 'invoice' ? `<button class="btn btn-outline btn-sm" onclick="convertToReceipt(${d.id})" data-tip="領収書を作成">領収書化</button>` : ''}
-            <button class="btn btn-ghost btn-sm" onclick="showDocVersions(${d.id})" data-tip="版履歴">📋</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})">削除</button>
-          </div>
-        </div>
-      `).join('');
-    }
-  }
+  await renderDetailDocsGrouped(customerId, docs);
 
   // Files placeholder
   const filesEl = document.getElementById('detail-files');
@@ -2535,26 +2505,16 @@ function openDocFromDetail(type) {
   const custId = detailCustomerId;
   closeDetailModal();
   if (!custId) return;
-  // AIウィザードパネルを開いて該当顧客で書類作成を開始
-  showPage('customers');
   const customer = window.APP.customers.find(c => c.id === custId);
   if (!customer) return;
-  wizard = { mode: type, step: 0, data: { items: [], extra: {} } };
-  docType = type;
-  const label = type === 'estimate' ? '見積書' : '領収書';
-  // PC: AIパネルにフォーカス、モバイル: シートを開く
-  const aiPanel = document.getElementById('ai-messages');
-  const mobileSheet = document.getElementById('mobile-ai-sheet');
-  if (mobileSheet && window.innerWidth < 768) {
-    openMobileAI();
-  }
-  if (aiPanel) {
-    aiPanel.innerHTML = '';
-    addMsg('user', label + 'を作成（' + customer.name + '）');
-    wizard.data.customer = customer;
-    wizard.data.customer_id = customer.id;
-    nextDocStep();
-  }
+  // 書類作成画面に直接遷移して顧客を自動選択
+  openDocModal(type).then(() => {
+    document.getElementById('doc-customer').value = custId;
+    const searchEl = document.getElementById('doc-customer-search');
+    if (searchEl) searchEl.value = customer.name + (customer.company ? ' / ' + customer.company : '');
+    const atenaEl = document.getElementById('doc-atena');
+    if (atenaEl && !atenaEl.value) atenaEl.value = customer.name;
+  });
 }
 
 // ================================================================
@@ -3229,7 +3189,7 @@ async function execConvertToReceipt() {
   };
   const { id } = await NAPI.createDocument(receiptData);
   await loadDocuments();
-  if (detailCustomerId) await openDetail(detailCustomerId);
+  if (detailCustomerId) { await openDetail(detailCustomerId); switchDetailTab('docs'); }
   showToast('領収書 ' + num + ' を作成しました');
   if (customer) await generatePDF({ ...receiptData, id }, customer);
 }
@@ -3262,7 +3222,7 @@ async function copyDoc(id) {
   await loadDocuments();
   renderDocuments();
   showToast('書類を複製しました: ' + num);
-  if (detailCustomerId) await openDetail(detailCustomerId);
+  if (detailCustomerId) { await openDetail(detailCustomerId); switchDetailTab('docs'); }
   if (created && created.id) {
     await openEditDocModal(created.id);
   }
@@ -3314,12 +3274,20 @@ async function convertToInvoice(estimateId) {
 async function deleteDoc(id) {
   showConfirm('この書類を削除しますか？', async () => {
     try {
+      // 現在のタブを記憶
+      const activeTab = ['info','docs','contact','files'].find(t => {
+        const p = document.getElementById('detail-panel-' + t);
+        return p && p.style.display !== 'none';
+      }) || 'docs';
       await NAPI.deleteDocument(id);
       await loadDocuments();
       renderDocuments();
       renderDashboard();
       showToast('削除しました');
-      if (detailCustomerId) openDetail(detailCustomerId);
+      if (detailCustomerId) {
+        await openDetail(detailCustomerId);
+        switchDetailTab(activeTab);
+      }
     } catch(e) {
       handleError(e, '削除に失敗しました');
     }

@@ -133,7 +133,7 @@ AIチャット機能：
 - Apple Developer Program加入済み（アクティベーション待ち）
 
 ### 残タスク（販売前必須）
-1. Apple Developer Programのアクティベーション確認
+1. Apple Developer Programのアクティベーション確認（待機中・最長48時間）
 2. 公証（Notarization）設定
 3. electron-updater有効化
 4. nexutha.netの公開確認

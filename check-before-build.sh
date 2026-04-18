@@ -11,7 +11,6 @@ ERRORS=0
 DB_DEV="$HOME/NEXUTHA-CRM-V2-electron/backend/data/nexutha.db"
 if [ -f "$DB_DEV" ]; then
   SIZE=$(wc -c < "$DB_DEV")
-  # 50KB以上 = 個人データが入っている可能性
   if [ "$SIZE" -gt 51200 ]; then
     echo "❌ [危険] backend/data/nexutha.db が ${SIZE} バイト存在します。"
     echo "   個人データが混入するリスクがあります。"
@@ -25,7 +24,17 @@ else
   echo "✅ backend/data/nexutha.db は存在しません（安全）"
 fi
 
-# --- チェック2: dist/ に古いdmgが残っていないか ---
+# --- チェック2: プロジェクト全体に想定外のDBファイルがないか ---
+DB_STRAY=$(find ~/NEXUTHA-CRM-V2-electron -name "*.db" -o -name "*.sqlite" 2>/dev/null | grep -v "node_modules" | grep -v "dist" || true)
+if [ -n "$DB_STRAY" ]; then
+  echo "❌ [危険] 想定外の場所にDBファイルが存在します:"
+  echo "$DB_STRAY"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "✅ 想定外のDBファイルなし（安全）"
+fi
+
+# --- チェック3: dist/ に古いdmgが残っていないか ---
 DMG_COUNT=$(find ~/NEXUTHA-CRM-V2-electron/dist -name "*.dmg" 2>/dev/null | wc -l | tr -d ' ')
 if [ "$DMG_COUNT" -gt 0 ]; then
   echo "⚠️  dist/ に古いdmgが ${DMG_COUNT} 個残っています（上書きされますが念のため確認を）"
@@ -34,7 +43,7 @@ else
   echo "✅ dist/ に古いdmgなし"
 fi
 
-# --- チェック3: dataフォルダがResourcesに含まれる設定になっていないか ---
+# --- チェック4: dataフォルダがResourcesに含まれる設定になっていないか ---
 EXTRA_RESOURCES=$(grep -A 30 '"extraResources"' ~/NEXUTHA-CRM-V2-electron/package.json 2>/dev/null || echo "")
 if echo "$EXTRA_RESOURCES" | grep -q '"data"'; then
   echo "❌ [危険] package.json の extraResources に 'data' が含まれています。"

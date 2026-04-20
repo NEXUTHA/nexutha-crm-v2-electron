@@ -12,6 +12,7 @@
     "build:win": "electron-builder --win"
   },
   "devDependencies": {
+    "@electron/notarize": "^3.1.1",
     "@playwright/test": "^1.59.1",
     "electron": "^36.0.0",
     "electron-builder": "^26.8.1",
@@ -32,7 +33,12 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "identity": "Yasuhide Yamashita (5ZW26ADG2F)",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist"
     },
     "win": {
       "icon": "assets/icon.ico",
@@ -87,7 +93,8 @@
       "provider": "github",
       "owner": "NEXUTHA",
       "repo": "nexutha-crm-v2-electron"
-    }
+    },
+    "afterSign": "scripts/notarize.js"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.82",

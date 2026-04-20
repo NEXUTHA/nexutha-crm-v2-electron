@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <link rel="manifest" href="manifest.json">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://cdnjs.cloudflare.com http://localhost:9876 https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://huggingface.co/mlc-ai/ blob:; font-src 'self' https://fonts.gstatic.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://cdnjs.cloudflare.com http://localhost:9876 https://gvaoljanjtgotzjzcfta.supabase.co https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://huggingface.co/mlc-ai/ blob:; font-src 'self' https://fonts.gstatic.com;">
   <meta name="viewport"  content="width=device-width, initial-scale=1.0">
 <title>NEXUTHA CRM</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
@@ -62,7 +62,7 @@
     <div style="background:#111;border:1px solid rgba(200,168,75,0.2);border-radius:12px;padding:32px;">
       <div style="font-size:14px;color:#e8e0d0;margin-bottom:8px;font-weight:600;">ライセンスキーを入力してください</div>
       <div style="font-size:12px;color:#7a7060;margin-bottom:20px;">購入時に発行されたキーを入力してください</div>
-      <input type="text" id="license-input" placeholder="NXTH-XXXX-XXXX-XXXX" maxlength="19"
+      <input type="text" id="license-input" placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX" maxlength="27"
         style="width:100%;background:#050505;border:1px solid rgba(200,168,75,0.3);color:#e8e0d0;padding:12px 14px;border-radius:6px;font-size:15px;font-family:'Courier New',monospace;box-sizing:border-box;letter-spacing:2px;text-align:center;"
         oninput="this.value=this.value.toUpperCase()">
       <div id="license-error" style="color:#f87171;font-size:12px;margin-top:8px;display:none;">ライセンスキーが正しくありません</div>
@@ -72,7 +72,7 @@
       </button>
       <div style="text-align:center;margin-top:16px;font-size:11px;color:#7a7060;">
         ライセンスキーをお持ちでない方は<br>
-        <a href="https://nexutha.com" target="_blank" style="color:#c8a84b;">nexutha.com</a> からご購入ください
+        <a href="https://nexutha.net" target="_blank" style="color:#c8a84b;">nexutha.net</a> からご購入ください
       </div>
     </div>
   </div>
@@ -5998,14 +5998,19 @@ async function _hash(str) {
 }
 
 async function verifyLicenseKey(key) {
-  if (!key || !key.match(/^NXTH-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}$/)) return false;
-  const secret = _dk();
-  const parts = key.split('-');
-  const id = parseInt(parts[1], 16);
-  if (id < 1 || id > 65535) return false;
-  const h = await _hash(secret + ':' + id);
-  const expected = 'NXTH-' + parts[1] + '-' + h.substring(0,4) + '-' + h.substring(4,8);
-  return expected === key;
+  if (!key || key.length < 10) return false;
+  try {
+    const res = await fetch('https://gvaoljanjtgotzjzcfta.supabase.co/functions/v1/verify-license', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ license_key: key })
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.valid === true;
+  } catch(e) {
+    return false;
+  }
 }
 
 async function getLicenseKey() {

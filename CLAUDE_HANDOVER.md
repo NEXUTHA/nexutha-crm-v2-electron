@@ -152,7 +152,7 @@ AIチャット機能：
 ### 残タスク（販売前必須）
 1. ~~Apple Developer Programのアクティベーション確認~~ 完了✅
 2. ~~公証（Notarization）設定~~ 完了✅
-3. electron-updater有効化
+3. ~~electron-updater有効化~~ 完了✅（実装済み・publish設定済み）
 4. nexutha.netの公開確認
 5. テスト購入実行
 6. Stripeダッシュボードで商品登録（NEXUTHA CRM ¥1,980）

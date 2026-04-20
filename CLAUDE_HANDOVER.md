@@ -144,9 +144,14 @@ AIチャット機能：
 - AIチャットで相談する→モデル選択→即起動の流れを実装
 - AIチャット中もモデル変更ボタンを表示
 
+- Apple Developer Programアクティベーション完了（Team ID: 5ZW26ADG2F）
+- Developer ID Application証明書作成・インストール完了
+- notarytool認証情報登録完了（nexutha-notarization）
+- v2.3.0 公証・署名済みdmgビルド・GitHub Releases公開完了
+
 ### 残タスク（販売前必須）
-1. Apple Developer Programのアクティベーション確認（待機中・最長48時間）
-2. 公証（Notarization）設定
+1. ~~Apple Developer Programのアクティベーション確認~~ 完了✅
+2. ~~公証（Notarization）設定~~ 完了✅
 3. electron-updater有効化
 4. nexutha.netの公開確認
 5. テスト購入実行

@@ -313,12 +313,12 @@ window.APP = {
 - create-checkout-session：本番商品ID直接参照方式 ✅
 - RESEND_API_KEY：設定済み ✅
 - メール送信元：@nexutha.net ✅
-- dmgダウンロードリンク：メールにv2.3.0のURLを埋め込み済み（v2.3.2に要更新）⚠️
+- dmgダウンロードリンク：メールにv2.3.2のURLを埋め込み済み ✅（ReadyAI対応済み）
 
 **残課題**
-- メール内のdmgダウンロードURLがv2.3.0のまま → v2.3.2に更新が必要
-  → ReadyAIへの指示：stripe-webhookのdmgダウンロードURLを以下に変更してください
+- メール内のdmgダウンロードURL：v2.3.2に更新済み ✅
   → https://github.com/NEXUTHA/nexutha-crm-v2-electron/releases/download/v2.3.2/NEXUTHA.CRM-2.3.2-arm64.dmg
+- サイト上のダウンロードリンクもv2.3.2に更新済み ✅（ReadyAI対応済み）
 
 ---
 

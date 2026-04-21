@@ -280,4 +280,46 @@ window.APP = {
 
 ---
 
+## 開発体制・役割分担
+
+| 担当 | 内容 |
+|------|------|
+| Claude（このAI） | Electronアプリ本体・FastAPIバックエンド・Supabase Edge Functions・ビルド・リリース |
+| ReadyAI | nexutha.netフロントエンド（ページ作成・デザイン・Stripe決済ボタン埋め込み）|
+
+**重要：役割をまたぐ変更の注意点**
+- ホームページ（nexutha.net）の変更 → ReadyAIに依頼
+- Electronアプリ・Edge Functions・GitHub Releasesの変更 → Claudeに依頼
+- Stripe商品登録・Supabaseシークレット設定 → 山下さんが手動でダッシュボード操作
+
+---
+
+## nexutha.net 現在の状態（2026-04-21時点）
+
+| ページ | URL | 状態 |
+|--------|-----|------|
+| トップ | / | 公開済み ✅ |
+| CRM商品ページ | /crm | 公開済み ✅ |
+| マニュアル | /crm/manual | 公開済み ✅ |
+| 特定商取引法 | /tokusho | 公開済み ✅ |
+| プライバシーポリシー | /privacy | 公開済み ✅ |
+| 利用規約 | /terms | 公開済み ✅ |
+
+**Stripe・Supabase連携状況**
+- Stripe本番モード：sk_live_... 設定済み ✅
+- 本番商品ID：prod_UNB0eoHXN9a58t（¥1,980）✅
+- stripe-webhook：デプロイ済み ✅
+- verify-license：マスターキー対応・デプロイ済み ✅
+- create-checkout-session：本番商品ID直接参照方式 ✅
+- RESEND_API_KEY：設定済み ✅
+- メール送信元：@nexutha.net ✅
+- dmgダウンロードリンク：メールにv2.3.0のURLを埋め込み済み（v2.3.2に要更新）⚠️
+
+**残課題**
+- メール内のdmgダウンロードURLがv2.3.0のまま → v2.3.2に更新が必要
+  → ReadyAIへの指示：stripe-webhookのdmgダウンロードURLを以下に変更してください
+  → https://github.com/NEXUTHA/nexutha-crm-v2-electron/releases/download/v2.3.2/NEXUTHA.CRM-2.3.2-arm64.dmg
+
+---
+
 *新スレの最初にこのファイルの内容をコピペすればAIが即座に状況を把握できます。*

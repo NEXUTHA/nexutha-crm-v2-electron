@@ -6096,14 +6096,14 @@ function compareVersions(a, b) {
 
 async function doUpdate() {
   const confirmed = await new Promise(resolve => {
-    showConfirm('アップデートを実行します。\nNEXUTHAが再起動されます。\n続けますか？', () => resolve(true), () => resolve(false));
+    showConfirm('アップデートを実行します。\nダウンロード後に自動で再起動されます。\n続けますか？', () => resolve(true), () => resolve(false));
   });
   if (!confirmed) return;
-  showToast('アップデート中... しばらくお待ちください');
-  try {
-    await fetch(`${API_BASE}/update`, { method: 'POST' });
-  } catch(e) {
-    showToast('アップデートスクリプトを実行してください: cd ~/NEXUTHA-CRM-V2 && git pull && docker compose down && docker compose build && docker compose up -d');
+  showToast('アップデートを確認中...');
+  if (window.electronAPI && window.electronAPI.checkForUpdates) {
+    window.electronAPI.checkForUpdates();
+  } else {
+    showToast('アップデートは次回起動時に自動で適用されます。');
   }
 }
 

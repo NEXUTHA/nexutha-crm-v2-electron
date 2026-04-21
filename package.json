@@ -1,6 +1,6 @@
 {
   "name": "nexutha-crm",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "NEXUTHA CRM - 完全ローカル型顧客管理システム",
   "main": "main.js",
   "author": "Yamashita Yasuhide / NEXUTHA",

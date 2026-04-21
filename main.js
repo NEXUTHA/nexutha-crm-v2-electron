@@ -208,6 +208,10 @@ app.whenReady().then(() => {
   // Cmd+Shift+A でAIチャットを開く
   // IPCでAIウィンドウを開く
   const { ipcMain } = require("electron");
+  ipcMain.on("check-for-updates", () => {
+    autoUpdater.checkForUpdates();
+  });
+
   ipcMain.on("open-ai-window", (event, model) => {
     createAIWindow(model);
   });

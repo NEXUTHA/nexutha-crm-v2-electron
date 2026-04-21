@@ -606,7 +606,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">現在のバージョン</div>
-          <div id="current-version-text" style="font-size:20px;font-weight:700;color:var(--gold);">v2.1.0</div>
+          <div id="current-version-text" style="font-size:20px;font-weight:700;color:var(--gold);"></div>
         </div>
         <button onclick="checkUpdate()" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;">🔄 更新を確認</button>
       </div>
@@ -6070,15 +6070,29 @@ async function submitLicense() {
 // ================================================================
 // アップデート・お知らせ機能
 // ================================================================
-const CURRENT_VERSION = "2.3.1";
+const CURRENT_VERSION = "2.3.2";
 const VERSION_URL = `${API_BASE}/version`;
 
 async function checkUpdate() {
+  const dispEl = document.getElementById('current-version-text');
+  if (dispEl) dispEl.textContent = 'v' + CURRENT_VERSION;
+  showToast('🔄 最新バージョンを確認中...');
   try {
     const res = await fetch(VERSION_URL + '?t=' + Date.now());
-    if (!res.ok) return null;
-    return await res.json();
+    if (!res.ok) { showToast('確認に失敗しました'); return null; }
+    const data = await res.json();
+    if (compareVersions(data.version, CURRENT_VERSION) > 0) {
+      const banner = document.getElementById('update-banner');
+      const bannerText = document.getElementById('update-banner-text');
+      if (banner) banner.style.display = 'flex';
+      if (bannerText) bannerText.textContent = 'v' + data.version + ' が利用可能です';
+      showToast('🎉 v' + data.version + ' にアップデートできます！');
+    } else {
+      showToast('✅ 最新バージョンです（v' + CURRENT_VERSION + '）');
+    }
+    return data;
   } catch(e) {
+    showToast('ネットワークエラー：確認できませんでした');
     return null;
   }
 }

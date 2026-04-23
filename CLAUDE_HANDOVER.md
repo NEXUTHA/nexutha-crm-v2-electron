@@ -170,7 +170,7 @@ AIチャット機能：
 - v2.3.3リリース済み ✅
 - 起動時にDevToolsが自動で開く問題を修正（app.isPackaged判定を追加）
 - ビルド・署名・公証・ステープル・GitHub Releasesリリース完了
-- ReadyAIへの依頼：stripe-webhookのdmgダウンロードURLをv2.3.3に更新すること ⚠️
+- stripe-webhookのdmgダウンロードURL：v2.3.3に更新済み ✅（ReadyAI対応済み）
 
 ### 残タスク（販売前必須）
 1. ~~Apple Developer Programのアクティベーション確認~~ 完了✅
@@ -319,7 +319,7 @@ window.APP = {
 - create-checkout-session：本番商品ID直接参照方式 ✅
 - RESEND_API_KEY：設定済み ✅
 - メール送信元：@nexutha.net ✅
-- dmgダウンロードリンク：メールにv2.3.2のURLを埋め込み済み ✅（ReadyAI対応済み）
+- dmgダウンロードリンク：メールにv2.3.3のURLを埋め込み済み ✅（ReadyAI対応済み）
 
 **残課題**
 - メール内のdmgダウンロードURL：v2.3.2に更新済み ✅

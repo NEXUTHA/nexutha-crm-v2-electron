@@ -73,7 +73,7 @@ function createWindow() {
 
 
   mainWindow.loadURL(`http://localhost:${PORT}`);
-  mainWindow.webContents.openDevTools(); // デバッグ用
+  if (!app.isPackaged) mainWindow.webContents.openDevTools(); // 開発時のみ
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);

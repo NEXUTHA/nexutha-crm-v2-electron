@@ -1,8 +1,16 @@
 {
-  "version": "2.3.2",
-  "released": "2026-04-21",
-  "notes": "アップデート機能修正",
+  "version": "2.3.3",
+  "released": "2026-04-24",
+  "notes": "DevTools自動起動の修正",
   "updates": [
+    {
+      "version": "2.3.3",
+      "released": "2026-04-24",
+      "title": "DevTools自動起動の修正",
+      "changes": [
+        "起動時にDevToolsが自動で開く問題を修正"
+      ]
+    },
     {
       "version": "2.3.2",
       "released": "2026-04-21",

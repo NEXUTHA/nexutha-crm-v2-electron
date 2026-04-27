@@ -349,3 +349,39 @@ window.APP = {
 ---
 
 *新スレの最初にこのファイルの内容をコピペすればAIが即座に状況を把握できます。*
+
+### 2026-04-27 作業内容
+- CRM独自カレンダー機能開発開始
+- backend/app.py にカレンダーAPI追加（/api/events GET/POST/PUT/DELETE）
+- index.htmlにカレンダーHTML・JS・メニュー追加
+- 開発版ポートを3456番に変更（配布版9876と完全分離）
+- 開発版に赤いDEVバナー追加（視認性確保）
+- dist/フォルダ整理（古いdmg削除・dataフォルダ削除）
+- package.jsonのproductNameを"NEXUTHA CRM DEV"に変更
+- main.jsのタイトルを"NEXUTHA CRM DEV"に変更
+- 開発用ライセンスキースキップ処理追加（NXTH-0001-3C6B-BF0B → true）
+
+### 次回やること（最優先）
+- カレンダー画面が表示されないバグを修正
+  - カレンダーメニュークリックで「自社情報」「AIアシスタント」が出てしまう
+  - 原因：page-calendarのHTMLがメインラッパーの外に出ている
+  - 修正手順：index.htmlのpage-calendarの位置を正しい場所に移動
+  - 正しい位置：page-settingsの直後・<script>タグの直前
+  - 確認コマンド：grep -n 'page-calendar\|page-settings\|^<script>' index.html
+  - 修正後にPlaywrightテスト追加・動作確認後にdmgビルド→v2.4.0リリース
+
+### 開発版と配布版の分離（2026-04-27確立）
+| 項目 | 配布版 | 開発版 |
+|------|--------|--------|
+| 起動方法 | ダブルクリック | ターミナルでnpx electron . |
+| ポート | 9876 | 3456 |
+| 目印 | なし | 赤いDEVバナー（サイドバー上部） |
+| データ保存先 | ~/Library/Application Support/NEXUTHA CRM/nexutha.db | ~/NEXUTHA-CRM-V2-electron/backend/data/nexutha.db |
+| productName | NEXUTHA CRM | NEXUTHA CRM DEV |
+
+### よくあるミス追記（2026-04-27）
+- 開発版と配布版を同時起動しない（ポートが違うので今後は大丈夫）
+- ターミナルでCtrl+Cを押すと開発版が終了する
+- git checkoutでindex.htmlを戻すと、ライセンススキップ処理・カレンダーJS・DEVバナーが全部消える
+- index.htmlを修正したあとはキャッシュが残るのでelectronを再起動すること
+- カレンダーHTMLはpage-settingsの直後・scriptタグの直前に入れること

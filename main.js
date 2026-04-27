@@ -6,7 +6,7 @@ const http = require('http');
 
 let mainWindow;
 let pythonProcess;
-const PORT = 9876;
+const PORT = 3456;
 
 function startPythonServer() {
   const isDev = !app.isPackaged;
@@ -62,7 +62,7 @@ function createWindow() {
     height: 900,
     minWidth: 800,
     minHeight: 600,
-    title: 'NEXUTHA CRM',
+    title: 'NEXUTHA CRM DEV',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

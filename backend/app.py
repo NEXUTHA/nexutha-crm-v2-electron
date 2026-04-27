@@ -1046,6 +1046,108 @@ def update_document_status(doc_id: int, data: dict):
     conn.close()
     return {"message": "ステータス更新しました"}
 
+
+# ===== カレンダーAPI =====
+
+class EventCreate(BaseModel):
+    title: str
+    customer_id: Optional[int] = None
+    start_dt: str  # ISO8601 例: 2026-04-27T10:00
+    end_dt: Optional[str] = None
+    memo: Optional[str] = None
+    color: Optional[str] = "#4A90D9"
+
+class EventUpdate(BaseModel):
+    title: Optional[str] = None
+    customer_id: Optional[int] = None
+    start_dt: Optional[str] = None
+    end_dt: Optional[str] = None
+    memo: Optional[str] = None
+    color: Optional[str] = None
+
+def init_calendar_db():
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            customer_id INTEGER,
+            start_dt TEXT NOT NULL,
+            end_dt TEXT,
+            memo TEXT,
+            color TEXT DEFAULT '#4A90D9',
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime'))
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_calendar_db()
+
+@app.get("/api/events")
+def get_events(year: int = None, month: int = None):
+    conn = get_db()
+    if year and month:
+        prefix = f"{year}-{month:02d}"
+        rows = conn.execute(
+            "SELECT e.*, c.name as customer_name FROM events e LEFT JOIN customers c ON e.customer_id = c.id WHERE e.start_dt LIKE ? ORDER BY e.start_dt",
+            (f"{prefix}%",)
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT e.*, c.name as customer_name FROM events e LEFT JOIN customers c ON e.customer_id = c.id ORDER BY e.start_dt"
+        ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+@app.post("/api/events")
+def create_event(event: EventCreate):
+    conn = get_db()
+    cur = conn.execute(
+        "INSERT INTO events (title, customer_id, start_dt, end_dt, memo, color) VALUES (?, ?, ?, ?, ?, ?)",
+        (event.title, event.customer_id, event.start_dt, event.end_dt, event.memo, event.color)
+    )
+    conn.commit()
+    event_id = cur.lastrowid
+    conn.close()
+    return {"id": event_id, "message": "予定を追加しました"}
+
+@app.put("/api/events/{event_id}")
+def update_event(event_id: int, event: EventUpdate):
+    conn = get_db()
+    fields = []
+    values = []
+    if event.title is not None:
+        fields.append("title = ?"); values.append(event.title)
+    if event.customer_id is not None:
+        fields.append("customer_id = ?"); values.append(event.customer_id)
+    if event.start_dt is not None:
+        fields.append("start_dt = ?"); values.append(event.start_dt)
+    if event.end_dt is not None:
+        fields.append("end_dt = ?"); values.append(event.end_dt)
+    if event.memo is not None:
+        fields.append("memo = ?"); values.append(event.memo)
+    if event.color is not None:
+        fields.append("color = ?"); values.append(event.color)
+    if not fields:
+        conn.close()
+        return {"message": "変更なし"}
+    fields.append("updated_at = datetime('now','localtime')")
+    values.append(event_id)
+    conn.execute(f"UPDATE events SET {', '.join(fields)} WHERE id = ?", values)
+    conn.commit()
+    conn.close()
+    return {"message": "予定を更新しました"}
+
+@app.delete("/api/events/{event_id}")
+def delete_event(event_id: int):
+    conn = get_db()
+    conn.execute("DELETE FROM events WHERE id = ?", (event_id,))
+    conn.commit()
+    conn.close()
+    return {"message": "予定を削除しました"}
+
 @app.get("/{filename:path}")
 def static_file(filename: str):
     # APIパスは除外
@@ -1063,4 +1165,4 @@ init_db()
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=9876, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=3456, reload=False)

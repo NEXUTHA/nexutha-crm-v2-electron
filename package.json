@@ -1,5 +1,5 @@
 {
-  "name": "nexutha-crm",
+  "name": "nexutha-crm-dev",
   "version": "2.3.3",
   "description": "NEXUTHA CRM - 完全ローカル型顧客管理システム",
   "main": "main.js",
@@ -20,7 +20,7 @@
   },
   "build": {
     "appId": "net.nexutha.crm",
-    "productName": "NEXUTHA CRM",
+    "productName": "NEXUTHA CRM DEV",
     "copyright": "© 2026 Yamashita Yasuhide / NEXUTHA",
     "mac": {
       "category": "public.app-category.business",
@@ -99,5 +99,6 @@
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.82",
     "electron-updater": "^6.8.3"
-  }
+  },
+  "productName": "NEXUTHA CRM DEV"
 }

@@ -2,7 +2,7 @@
 NEXUTHA CRM V2 — Backend Server
 Python + SQLite + FastAPI
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -1067,19 +1067,48 @@ class EventUpdate(BaseModel):
 
 def init_calendar_db():
     conn = get_db()
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            customer_id INTEGER,
-            start_dt TEXT NOT NULL,
-            end_dt TEXT,
-            memo TEXT,
-            color TEXT DEFAULT '#4A90D9',
-            created_at TEXT DEFAULT (datetime('now','localtime')),
-            updated_at TEXT DEFAULT (datetime('now','localtime'))
-        )
-    """)
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS day_info (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT UNIQUE NOT NULL,
+        memo TEXT DEFAULT '',
+        color TEXT DEFAULT ''
+    )""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS day_customers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        customer_id INTEGER,
+        custom_name TEXT
+    )""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        customer_id INTEGER,
+        start_dt TEXT NOT NULL,
+        end_dt TEXT,
+        memo TEXT,
+        color TEXT DEFAULT '#4A90D9',
+        created_at TEXT DEFAULT (datetime('now','localtime')),
+        updated_at TEXT DEFAULT (datetime('now','localtime'))
+    )""")
+    # Migration: add custom_name column and make customer_id nullable in existing DBs
+    try:
+        cursor.execute("SELECT custom_name FROM day_customers LIMIT 1")
+    except Exception:
+        try:
+            cursor.execute("""
+                CREATE TABLE day_customers_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    date TEXT NOT NULL,
+                    customer_id INTEGER,
+                    custom_name TEXT
+                )
+            """)
+            cursor.execute("INSERT INTO day_customers_new (id, date, customer_id) SELECT id, date, customer_id FROM day_customers")
+            cursor.execute("DROP TABLE day_customers")
+            cursor.execute("ALTER TABLE day_customers_new RENAME TO day_customers")
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
@@ -1148,6 +1177,94 @@ def delete_event(event_id: int):
     conn.close()
     return {"message": "予定を削除しました"}
 
+@app.get("/api/day/{date}")
+def get_day(date: str):
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM day_info WHERE date = ?", (date,)).fetchone()
+        customers = conn.execute(
+            """SELECT dc.id, dc.customer_id, COALESCE(c.name, dc.custom_name) as name,
+               c.company, c.memo, dc.custom_name
+               FROM day_customers dc
+               LEFT JOIN customers c ON dc.customer_id = c.id
+               WHERE dc.date = ?""",
+            (date,)
+        ).fetchall()
+        events = conn.execute(
+            "SELECT e.*, c.name as customer_name FROM events e LEFT JOIN customers c ON e.customer_id = c.id WHERE e.start_dt LIKE ? ORDER BY e.start_dt",
+            (date + "%",)
+        ).fetchall()
+        return {
+            "memo": row["memo"] if row else "",
+            "color": row["color"] if row else "",
+            "customers": [dict(c) for c in customers],
+            "events": [dict(e) for e in events],
+        }
+
+@app.post("/api/day/{date}/memo")
+async def save_day_memo(date: str, request: Request):
+    body = await request.json()
+    with get_db() as conn:
+        existing = conn.execute("SELECT id FROM day_info WHERE date = ?", (date,)).fetchone()
+        if existing:
+            conn.execute("UPDATE day_info SET memo = ?, color = ? WHERE date = ?",
+                (body.get("memo", ""), body.get("color", ""), date))
+        else:
+            conn.execute("INSERT INTO day_info (date, memo, color) VALUES (?, ?, ?)",
+                (date, body.get("memo", ""), body.get("color", "")))
+        conn.commit()
+    return {"ok": True}
+
+@app.post("/api/day/{date}/customers")
+async def add_day_customer(date: str, request: Request):
+    body = await request.json()
+    customer_id = body.get("customer_id")
+    custom_name = (body.get("custom_name") or "").strip()
+    with get_db() as conn:
+        if customer_id:
+            existing = conn.execute("SELECT id FROM day_customers WHERE date = ? AND customer_id = ?",
+                (date, customer_id)).fetchone()
+            if not existing:
+                conn.execute("INSERT INTO day_customers (date, customer_id) VALUES (?, ?)",
+                    (date, customer_id))
+                conn.commit()
+        elif custom_name:
+            conn.execute("INSERT INTO day_customers (date, custom_name) VALUES (?, ?)",
+                (date, custom_name))
+            conn.commit()
+    return {"ok": True}
+
+@app.delete("/api/day/{date}/customers/{entry_id}")
+def remove_day_customer(date: str, entry_id: int):
+    with get_db() as conn:
+        conn.execute("DELETE FROM day_customers WHERE id = ? AND date = ?",
+            (entry_id, date))
+        conn.commit()
+    return {"ok": True}
+
+@app.get("/api/day-summary/{year}/{month}")
+def get_day_summary(year: int, month: int):
+    prefix = f"{year}-{month:02d}"
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM day_info WHERE date LIKE ?", (f"{prefix}%",)
+        ).fetchall()
+        day_customers = conn.execute(
+            """SELECT dc.date, COALESCE(c.name, dc.custom_name) as name
+               FROM day_customers dc
+               LEFT JOIN customers c ON dc.customer_id = c.id
+               WHERE dc.date LIKE ?""",
+            (f"{prefix}%",)
+        ).fetchall()
+    result = {}
+    for row in rows:
+        result[row["date"]] = {"color": row["color"] or "", "memo": row["memo"] or "", "customers": []}
+    for dc in day_customers:
+        date = dc["date"]
+        if date not in result:
+            result[date] = {"color": "", "memo": "", "customers": []}
+        result[date]["customers"].append(dc["name"])
+    return result
+
 @app.get("/{filename:path}")
 def static_file(filename: str):
     # APIパスは除外
@@ -1166,3 +1283,7 @@ init_db()
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=3456, reload=False)
+
+
+# ================================================================
+# 日付詳細API

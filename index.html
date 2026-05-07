@@ -157,7 +157,7 @@
       CSV インポート
     </div>
 
-    <div class="nav-item" onclick="showPage('calendar')" data-page="calendar" data-tip="顧客との予定を管理するカレンダー">
+    <div class="nav-item" onclick="showPage('calendar')" data-page="calendar" data-tip="予定を管理するカレンダー">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       カレンダー
     </div>
@@ -1907,80 +1907,6 @@
 
     <!-- 連絡履歴 -->
 
-
-  <!-- カレンダー -->
-  <div id="page-calendar" class="page" style="display:none;">
-    <div class="page-header">
-      <div class="page-title" style="font-size:28px;letter-spacing:6px;">カレンダー</div>
-      <div class="page-subtitle">SCHEDULE MANAGEMENT</div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <button class="btn-secondary" onclick="calendarPrevMonth()">&#8249;</button>
-        <span id="calendar-title" style="font-size:18px;font-weight:600;letter-spacing:2px;min-width:140px;text-align:center;"></span>
-        <button class="btn-secondary" onclick="calendarNextMonth()">&#8250;</button>
-        <button class="btn-secondary" onclick="calendarToday()">今月</button>
-      </div>
-      <button class="btn-primary" onclick="openEventModal()">＋ 予定を追加</button>
-    </div>
-    <div style="background:var(--card-bg);border-radius:12px;padding:20px;box-shadow:var(--shadow);">
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;">
-        <div style="text-align:center;font-size:12px;color:#e74c3c;padding:8px;">日</div>
-        <div style="text-align:center;font-size:12px;color:var(--text-secondary);padding:8px;">月</div>
-        <div style="text-align:center;font-size:12px;color:var(--text-secondary);padding:8px;">火</div>
-        <div style="text-align:center;font-size:12px;color:var(--text-secondary);padding:8px;">水</div>
-        <div style="text-align:center;font-size:12px;color:var(--text-secondary);padding:8px;">木</div>
-        <div style="text-align:center;font-size:12px;color:var(--text-secondary);padding:8px;">金</div>
-        <div style="text-align:center;font-size:12px;color:#4A90D9;padding:8px;">土</div>
-      </div>
-      <div id="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
-    </div>
-    <div id="event-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
-      <div style="background:var(--card-bg);border-radius:16px;padding:32px;width:480px;max-width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-        <h3 id="event-modal-title" style="margin:0 0 24px;font-size:18px;letter-spacing:2px;">予定を追加</h3>
-        <input type="hidden" id="event-id">
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">タイトル *</label>
-          <input id="event-title" type="text" placeholder="例：打ち合わせ・現地調査" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;">
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">顧客</label>
-          <select id="event-customer" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;">
-            <option value="">顧客を選択（任意）</option>
-          </select>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-          <div>
-            <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">開始日時 *</label>
-            <input id="event-start" type="datetime-local" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;">
-          </div>
-          <div>
-            <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">終了日時</label>
-            <input id="event-end" type="datetime-local" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;">
-          </div>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">メモ</label>
-          <textarea id="event-memo" rows="3" placeholder="備考・メモ" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;resize:vertical;"></textarea>
-        </div>
-        <div style="margin-bottom:24px;">
-          <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px;">色</label>
-          <div style="display:flex;gap:8px;">
-            <span onclick="selectEventColor('#4A90D9')" style="width:28px;height:28px;border-radius:50%;background:#4A90D9;cursor:pointer;border:3px solid transparent;" data-color="#4A90D9"></span>
-            <span onclick="selectEventColor('#27ae60')" style="width:28px;height:28px;border-radius:50%;background:#27ae60;cursor:pointer;border:3px solid transparent;" data-color="#27ae60"></span>
-            <span onclick="selectEventColor('#e67e22')" style="width:28px;height:28px;border-radius:50%;background:#e67e22;cursor:pointer;border:3px solid transparent;" data-color="#e67e22"></span>
-            <span onclick="selectEventColor('#e74c3c')" style="width:28px;height:28px;border-radius:50%;background:#e74c3c;cursor:pointer;border:3px solid transparent;" data-color="#e74c3c"></span>
-            <span onclick="selectEventColor('#8e44ad')" style="width:28px;height:28px;border-radius:50%;background:#8e44ad;cursor:pointer;border:3px solid transparent;" data-color="#8e44ad"></span>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;justify-content:flex-end;">
-          <button class="btn-secondary" onclick="closeEventModal()">キャンセル</button>
-          <button id="event-delete-btn" class="btn-secondary" style="display:none;color:#e74c3c;" onclick="deleteEvent()">削除</button>
-          <button class="btn-primary" onclick="saveEvent()">保存</button>
-        </div>
-      </div>
-    </div>
-  </div>
   </div>
 </div>
 <script>
@@ -1998,7 +1924,7 @@ const CRM_CONSTANTS = {
   WITHHOLDING_THRESHOLD:    1000000,
   WITHHOLDING_RATE_LOW:     0.1021,
   WITHHOLDING_RATE_HIGH:    0.2042,
-  REVENUE_STAMP_THRESHOLD:  34560,
+  REVENUE_STAMP_THRESHOLD:  50000,
   MAX_FILE_SIZE_DEFAULT:    5,
   MEISHI_MAX_SIZE_MB:       5,
   IMAGE_MAX_SIZE_MB:        10,
@@ -2006,7 +1932,7 @@ const CRM_CONSTANTS = {
   DOC_PAYMENT_DUE_DAYS:     30,
   DEADLINE_WARNING_DAYS:    3,
   TOAST_DURATION_MS:        3000,
-  TOAST_DURATION_LONG_MS:   3456,
+  TOAST_DURATION_LONG_MS:   5000,
   RECENT_DOCS_LIMIT:        10,
   CUSTOMER_RANKING_LIMIT:   5,
   SEARCH_DEBOUNCE_MS:       300,
@@ -2307,6 +2233,9 @@ function buildFontGrids() {
 // Page Navigation
 // ================================================================
 function showPage(page) {
+  // 日付詳細ページを閉じる
+  const dayPage = document.getElementById('page-day');
+  if (dayPage) dayPage.style.display = 'none';
   // AIパネルが不要なページでは非表示（設定・CSVインポートのみ）
   const aiPanel = document.querySelector('.ai-panel');
   const noAiPages = ['settings', 'import'];
@@ -4068,7 +3997,7 @@ async function lookupZip(zip) {
 
 function askZip() {
   wizard.data._addrPhase = 'zip';
-  addMsg('ai', '郵便番号を入力してください。\n<span style="color:var(--text3);font-size:11px;">例: 1345601（ハイフンなし7桁）</span>', []);
+  addMsg('ai', '郵便番号を入力してください。\n<span style="color:var(--text3);font-size:11px;">例: 1500001（ハイフンなし7桁）</span>', []);
 }
 
 async function handleZipInput(val) {
@@ -4408,7 +4337,7 @@ function handleDocItemInput(val) {
   } else if (phase === 'item_qty') {
     wizard.data.items[idx].qty = parseFloat(val) || 1;
     wizard.data._docPhase = 'item_price';
-    addMsg('ai', '単価を入力してください（円）。\n<span style="color:var(--text3);font-size:11px;">例: 3456</span>', []);
+    addMsg('ai', '単価を入力してください（円）。\n<span style="color:var(--text3);font-size:11px;">例: 5000</span>', []);
   } else if (phase === 'item_price') {
     wizard.data.items[idx].price = parseFloat(val.replace(/,/g,'')) || 0;
     wizard.data._docPhase = null;
@@ -5174,7 +5103,7 @@ function checkDeadlineNotifications() {
     }
   });
   if (alerts.length > 0) {
-    alerts.slice(0,3).forEach(msg => showToast(msg, 3456));
+    alerts.slice(0,3).forEach(msg => showToast(msg, 5000));
   }
 }
 
@@ -6078,8 +6007,8 @@ async function _hash(str) {
 }
 
 async function verifyLicenseKey(key) {
-  if (!key || key.length < 10) return false;
   if (key === 'NXTH-0001-3C6B-BF0B') return true;
+  if (!key || key.length < 10) return false;
   try {
     const res = await fetch('https://gvaoljanjtgotzjzcfta.supabase.co/functions/v1/verify-license', {
       method: 'POST',
@@ -6339,19 +6268,26 @@ window.addEventListener('load', async () => {
 let calendarYear = new Date().getFullYear();
 let calendarMonth = new Date().getMonth() + 1;
 let calendarEvents = [];
+let calendarDaySummary = {};
 let selectedEventColor = '#4A90D9';
 
 async function loadCalendar() {
-  const res = await fetch('http://localhost:3456/api/events?year=' + calendarYear + '&month=' + calendarMonth);
-  calendarEvents = await res.json();
+  try {
+    const res = await fetch(API_BASE + '/events?year=' + calendarYear + '&month=' + calendarMonth);
+    calendarEvents = await res.json();
+  } catch(e) { calendarEvents = []; }
+  try {
+    const res2 = await fetch(API_BASE + '/day-summary/' + calendarYear + '/' + calendarMonth);
+    calendarDaySummary = await res2.json();
+  } catch(e) { calendarDaySummary = {}; }
   renderCalendar();
 }
 
 function renderCalendar() {
   const title = document.getElementById('calendar-title');
-  if (!title) return;
-  title.textContent = calendarYear + '年 ' + calendarMonth + '月';
   const grid = document.getElementById('calendar-grid');
+  if (!title || !grid) return;
+  title.textContent = calendarYear + '年 ' + calendarMonth + '月';
   grid.innerHTML = '';
   const firstDay = new Date(calendarYear, calendarMonth - 1, 1).getDay();
   const daysInMonth = new Date(calendarYear, calendarMonth, 0).getDate();
@@ -6359,49 +6295,43 @@ function renderCalendar() {
   for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div></div>';
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = calendarYear + '-' + String(calendarMonth).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    const isToday = today.getFullYear() === calendarYear && today.getMonth() + 1 === calendarMonth && today.getDate() === d;
+    const isToday = today.getFullYear() === calendarYear && today.getMonth()+1 === calendarMonth && today.getDate() === d;
     const dayOfWeek = (firstDay + d - 1) % 7;
-    const isSun = dayOfWeek === 0;
-    const isSat = dayOfWeek === 6;
-    const dayEvents = calendarEvents.filter(e => e.start_dt.startsWith(dateStr));
-    let eventsHtml = dayEvents.map(e => '<div onclick="editEvent(' + e.id + ')" style="background:' + e.color + ';color:#fff;border-radius:4px;padding:2px 5px;font-size:10px;margin-top:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + (e.customer_name ? e.customer_name + ' ' : '') + e.title + '</div>').join('');
-    grid.innerHTML += '<div onclick="openEventModalWithDate(\'' + dateStr + '\')" style="min-height:80px;border:1px solid var(--border);border-radius:8px;padding:6px;cursor:pointer;' + (isToday ? 'background:rgba(74,144,217,0.1);border-color:#4A90D9;' : '') + '"><div style="font-size:13px;font-weight:' + (isToday ? '700' : '400') + ';color:' + (isSun ? '#e74c3c' : isSat ? '#4A90D9' : 'var(--text)') + ';' + (isToday ? 'background:#4A90D9;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;' : '') + '">' + d + '</div>' + eventsHtml + '</div>';
+    const isSun = dayOfWeek === 0, isSat = dayOfWeek === 6;
+    const dayEvents = calendarEvents.filter(e => e.start_dt && e.start_dt.startsWith(dateStr));
+    const eventsHtml = dayEvents.map(e => '<div onclick="editEvent(' + e.id + ')" style="background:' + e.color + ';color:#fff;border-radius:4px;padding:2px 5px;font-size:10px;margin-top:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + (e.customer_name ? e.customer_name + ' ' : '') + e.title + '</div>').join('');
+    const color = isSun ? '#e74c3c' : isSat ? '#4A90D9' : 'var(--text)';
+    const bg = isToday ? 'var(--gold)' : 'var(--bg2)';
+    const textColor = isToday ? '#000' : color;
+    const daySummary = calendarDaySummary[dateStr] || {};
+    const dayColor = daySummary.color || '';
+    const dayCustomers = daySummary.customers || [];
+    const borderStyle = dayColor ? 'border-left:3px solid ' + dayColor + ';' : '';
+    const customersHtml = dayCustomers.map(name => '<div style="font-size:10px;color:var(--text2);background:rgba(255,255,255,0.07);border-radius:3px;padding:1px 4px;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + name + '</div>').join('');
+    grid.innerHTML += '<div onclick="openDayPage(\'' + dateStr + '\')" style="min-height:80px;background:' + bg + ';border-radius:8px;padding:6px;cursor:pointer;border:1px solid var(--border);' + borderStyle + '">' +
+      '<div style="font-size:13px;font-weight:600;color:' + textColor + ';margin-bottom:2px;">' + d + '</div>' +
+      customersHtml + eventsHtml + '</div>';
   }
 }
 
-function calendarPrevMonth() {
-  calendarMonth--;
-  if (calendarMonth < 1) { calendarMonth = 12; calendarYear--; }
-  loadCalendar();
-}
+function calendarPrevMonth() { calendarMonth--; if (calendarMonth < 1) { calendarMonth = 12; calendarYear--; } loadCalendar(); }
+function calendarNextMonth() { calendarMonth++; if (calendarMonth > 12) { calendarMonth = 1; calendarYear++; } loadCalendar(); }
+function calendarToday() { calendarYear = new Date().getFullYear(); calendarMonth = new Date().getMonth()+1; loadCalendar(); }
 
-function calendarNextMonth() {
-  calendarMonth++;
-  if (calendarMonth > 12) { calendarMonth = 1; calendarYear++; }
-  loadCalendar();
-}
-
-function calendarToday() {
-  calendarYear = new Date().getFullYear();
-  calendarMonth = new Date().getMonth() + 1;
-  loadCalendar();
-}
-
-async function openEventModal(dateStr) {
+function openEventModal(dateStr) {
   document.getElementById('event-modal-title').textContent = '予定を追加';
   document.getElementById('event-id').value = '';
   document.getElementById('event-title').value = '';
-  document.getElementById('event-memo').value = '';
   document.getElementById('event-start').value = dateStr ? dateStr + 'T09:00' : '';
-  document.getElementById('event-end').value = dateStr ? dateStr + 'T10:00' : '';
+  document.getElementById('event-end').value = '';
+  document.getElementById('event-memo').value = '';
   document.getElementById('event-delete-btn').style.display = 'none';
   selectedEventColor = '#4A90D9';
   updateColorUI();
-  await loadCustomerSelect();
+  loadCustomerSelect(null);
+  document.body.appendChild(document.getElementById('event-modal'));
   document.getElementById('event-modal').style.display = 'flex';
 }
-
-function openEventModalWithDate(dateStr) { openEventModal(dateStr); }
 
 async function editEvent(eventId) {
   const e = calendarEvents.find(e => e.id === eventId);
@@ -6409,9 +6339,9 @@ async function editEvent(eventId) {
   document.getElementById('event-modal-title').textContent = '予定を編集';
   document.getElementById('event-id').value = e.id;
   document.getElementById('event-title').value = e.title;
+  document.getElementById('event-start').value = e.start_dt ? e.start_dt.slice(0,16) : '';
+  document.getElementById('event-end').value = e.end_dt ? e.end_dt.slice(0,16) : '';
   document.getElementById('event-memo').value = e.memo || '';
-  document.getElementById('event-start').value = e.start_dt;
-  document.getElementById('event-end').value = e.end_dt || '';
   document.getElementById('event-delete-btn').style.display = 'inline-block';
   selectedEventColor = e.color || '#4A90D9';
   updateColorUI();
@@ -6419,21 +6349,23 @@ async function editEvent(eventId) {
   document.getElementById('event-modal').style.display = 'flex';
 }
 
+function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
+
 async function loadCustomerSelect(selectedId) {
-  const res = await fetch('http://localhost:3456/api/customers');
-  const customers = await res.json();
   const sel = document.getElementById('event-customer');
   sel.innerHTML = '<option value="">顧客を選択（任意）</option>';
-  customers.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = c.name + (c.company ? ' (' + c.company + ')' : '');
-    if (selectedId && c.id === selectedId) opt.selected = true;
-    sel.appendChild(opt);
-  });
+  try {
+    const res = await fetch(API_BASE + '/customers');
+    const customers = await res.json();
+    customers.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name + (c.company ? ' (' + c.company + ')' : '');
+      if (selectedId && c.id === selectedId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  } catch(e) {}
 }
-
-function closeEventModal() { document.getElementById('event-modal').style.display = 'none'; }
 
 function selectEventColor(color) { selectedEventColor = color; updateColorUI(); }
 
@@ -6447,23 +6379,340 @@ async function saveEvent() {
   const title = document.getElementById('event-title').value.trim();
   const start = document.getElementById('event-start').value;
   if (!title || !start) { alert('タイトルと開始日時は必須です'); return; }
-  const data = { title, customer_id: document.getElementById('event-customer').value ? parseInt(document.getElementById('event-customer').value) : null, start_dt: start, end_dt: document.getElementById('event-end').value || null, memo: document.getElementById('event-memo').value || null, color: selectedEventColor };
   const eventId = document.getElementById('event-id').value;
-  const url = eventId ? 'http://localhost:3456/api/events/' + eventId : 'http://localhost:3456/api/events';
+  const data = { title, start_dt: start, end_dt: document.getElementById('event-end').value || null, memo: document.getElementById('event-memo').value || null, customer_id: document.getElementById('event-customer').value || null, color: selectedEventColor };
+  const url = eventId ? API_BASE + '/events/' + eventId : API_BASE + '/events';
   const method = eventId ? 'PUT' : 'POST';
   await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
   closeEventModal();
   loadCalendar();
+  if (document.getElementById('page-day').style.display !== 'none') await loadDayData();
 }
 
 async function deleteEvent() {
   const eventId = document.getElementById('event-id').value;
   if (!eventId || !confirm('この予定を削除しますか？')) return;
-  await fetch('http://localhost:3456/api/events/' + eventId, { method: 'DELETE' });
+  await fetch(API_BASE + '/events/' + eventId, { method: 'DELETE' });
   closeEventModal();
+  loadCalendar();
+  if (document.getElementById('page-day').style.display !== 'none') await loadDayData();
+}
+
+function setEventPreset(text) {
+  document.getElementById('event-title').value = text;
+  document.getElementById('event-title').focus();
+}
+
+
+// ===== 日付詳細ページ =====
+let currentDayDate = '';
+let currentDayColor = '';
+let _dayPageEvents = [];
+
+async function openDayPage(dateStr) {
+  currentDayDate = dateStr;
+  const d = new Date(dateStr);
+  const week = ['日','月','火','水','木','金','土'][d.getDay()];
+  document.getElementById('day-page-title').textContent = 
+    dateStr.replace(/-/g, '/') + '（' + week + '）';
+  
+  document.getElementById('page-day').style.display = 'block';
+  await loadDayData();
+}
+
+function closeDayPage() {
+  document.getElementById('page-day').style.display = 'none';
+  document.getElementById('day-customer-select-overlay').style.display = 'none';
   loadCalendar();
 }
 
+async function loadDayData() {
+  try {
+    const res = await fetch(API_BASE + '/day/' + currentDayDate);
+    const data = await res.json();
+    currentDayColor = data.color || '';
+    
+    // 色UI更新
+    updateDayColorUI(currentDayColor);
+    
+    // メモ
+    document.getElementById('day-memo-input').value = data.memo || '';
+    
+    // 顧客リスト
+    renderDayCustomers(data.customers || []);
+    
+    // 予定リスト
+    renderDayEvents(data.events || []);
+  } catch(e) {
+    console.error('loadDayData error:', e);
+  }
+}
+
+function updateDayColorUI(color) {
+  document.querySelectorAll('[data-day-color]').forEach(el => {
+    el.style.border = el.dataset.dayColor === color ? '2px solid var(--text)' : '2px solid transparent';
+  });
+}
+
+async function setDayColor(color) {
+  currentDayColor = color;
+  updateDayColorUI(color);
+  const memo = document.getElementById('day-memo-input').value;
+  await fetch(API_BASE + '/day/' + currentDayDate + '/memo', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ memo, color })
+  });
+  renderCalendar();
+}
+
+async function saveDayMemo() {
+  const memo = document.getElementById('day-memo-input').value;
+  await fetch(API_BASE + '/day/' + currentDayDate + '/memo', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ memo, color: currentDayColor })
+  });
+  showToast('メモを保存しました');
+  renderCalendar();
+}
+
+function renderDayCustomers(customers) {
+  const el = document.getElementById('day-customers-list');
+  if (!customers.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;">顧客が登録されていません</div>';
+    return;
+  }
+  el.innerHTML = customers.map(c => `
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${c.name}${c.company ? ' / ' + c.company : ''}${!c.customer_id ? ' <span style="font-size:10px;color:var(--text3);background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:3px;vertical-align:middle;">自由入力</span>' : ''}</div>
+        ${c.memo ? '<div style="font-size:11px;color:var(--text3);margin-top:4px;white-space:pre-wrap;">' + c.memo + '</div>' : ''}
+      </div>
+      <button onclick="removeDayCustomer(${c.id})" style="background:transparent;border:1px solid rgba(248,113,113,0.4);color:#f87171;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;white-space:nowrap;">削除</button>
+    </div>
+  `).join('');
+}
+
+function renderDayEvents(events) {
+  _dayPageEvents = events;
+  const el = document.getElementById('day-events-list');
+  if (!events.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;">予定が登録されていません</div>';
+    return;
+  }
+  el.innerHTML = events.map(e => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+      <div style="width:14px;height:14px;border-radius:50%;background:${e.color || '#4A90D9'};flex-shrink:0;cursor:pointer;" onclick="editEventFromDay(${e.id})"></div>
+      <div style="flex:1;cursor:pointer;min-width:0;" onclick="editEventFromDay(${e.id})">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${e.title}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${e.start_dt ? e.start_dt.slice(11,16) : '終日'}${e.customer_name ? ' · ' + e.customer_name : ''}${e.memo ? ' · ' + e.memo : ''}</div>
+      </div>
+      <button onclick="editEventFromDay(${e.id})" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;white-space:nowrap;">編集</button>
+      <button onclick="deleteDayEvent(${e.id})" style="background:transparent;border:1px solid rgba(248,113,113,0.4);color:#f87171;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;white-space:nowrap;">削除</button>
+    </div>
+  `).join('');
+}
+
+async function openDayCustomerSelect() {
+  const overlay = document.getElementById('day-customer-select-overlay');
+  overlay.style.display = 'flex';
+  const search = document.getElementById('day-customer-search');
+  if (search) search.value = '';
+  const customInput = document.getElementById('day-customer-custom-name');
+  if (customInput) customInput.value = '';
+  if (!window.APP.customers || !window.APP.customers.length) {
+    try {
+      const res = await fetch(API_BASE + '/customers');
+      window.APP.customers = await res.json();
+    } catch(e) {}
+  }
+  filterDayCustomers('');
+}
+
+async function addCustomDayCustomer() {
+  const name = (document.getElementById('day-customer-custom-name').value || '').trim();
+  if (!name) return;
+  await fetch(API_BASE + '/day/' + currentDayDate + '/customers', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ custom_name: name })
+  });
+  closeDayCustomerSelect();
+  await loadDayData();
+  showToast('顧客を追加しました');
+}
+
+function closeDayCustomerSelect() {
+  document.getElementById('day-customer-select-overlay').style.display = 'none';
+}
+
+async function editEventFromDay(eventId) {
+  const e = _dayPageEvents.find(ev => ev.id === eventId);
+  if (!e) return;
+  document.getElementById('event-modal-title').textContent = '予定を編集';
+  document.getElementById('event-id').value = e.id;
+  document.getElementById('event-title').value = e.title;
+  document.getElementById('event-start').value = e.start_dt ? e.start_dt.slice(0,16) : '';
+  document.getElementById('event-end').value = e.end_dt ? e.end_dt.slice(0,16) : '';
+  document.getElementById('event-memo').value = e.memo || '';
+  document.getElementById('event-delete-btn').style.display = 'inline-block';
+  selectedEventColor = e.color || '#4A90D9';
+  updateColorUI();
+  await loadCustomerSelect(e.customer_id);
+  document.body.appendChild(document.getElementById('event-modal'));
+  document.getElementById('event-modal').style.display = 'flex';
+}
+
+function filterDayCustomers(query) {
+  const q = query.toLowerCase();
+  const filtered = window.APP.customers.filter(c =>
+    !q || (c.name||'').toLowerCase().includes(q) || (c.company||'').toLowerCase().includes(q)
+  );
+  const el = document.getElementById('day-customer-select-list');
+  el.innerHTML = filtered.map(c => `
+    <div onclick="addDayCustomer(${c.id})" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);"
+      onmouseover="this.style.background='rgba(200,168,75,0.1)'" onmouseout="this.style.background=''">
+      <div style="font-size:13px;color:var(--text);">${c.name}</div>
+      ${c.company ? '<div style="font-size:11px;color:var(--text3);">' + c.company + '</div>' : ''}
+    </div>
+  `).join('');
+}
+
+async function addDayCustomer(customerId) {
+  await fetch(API_BASE + '/day/' + currentDayDate + '/customers', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ customer_id: customerId })
+  });
+  closeDayCustomerSelect();
+  await loadDayData();
+  showToast('顧客を追加しました');
+}
+
+async function removeDayCustomer(entryId) {
+  await fetch(API_BASE + '/day/' + currentDayDate + '/customers/' + entryId, { method: 'DELETE' });
+  await loadDayData();
+  showToast('顧客を削除しました');
+}
+
+function openDayEventAdd() {
+  openEventModal(currentDayDate);
+}
+
+async function deleteDayEvent(eventId) {
+  if (!confirm('この予定を削除しますか？')) return;
+  await fetch(API_BASE + '/events/' + eventId, { method: 'DELETE' });
+  await loadDayData();
+  showToast('削除しました');
+}
+
 </script>
+
+  <!-- カレンダー -->
+  <div id="page-calendar" class="page">
+    <div class="page-header">
+      <div class="page-title" style="font-size:28px;letter-spacing:6px;">カレンダー</div>
+      <div class="page-subtitle">SCHEDULE MANAGEMENT</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn-secondary" onclick="calendarPrevMonth()">&#8249;</button>
+        <span id="calendar-title" style="font-size:18px;font-weight:600;letter-spacing:2px;min-width:140px;text-align:center;"></span>
+        <button class="btn-secondary" onclick="calendarNextMonth()">&#8250;</button>
+        <button class="btn-secondary" onclick="calendarToday()">今月</button>
+      </div>
+      <button class="btn-primary" onclick="openEventModal()">＋ 予定を追加</button>
+    </div>
+    <div style="background:var(--bg2);border-radius:12px;padding:20px;">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;">
+        <div style="text-align:center;font-size:12px;color:#e74c3c;padding:8px;">日</div>
+        <div style="text-align:center;font-size:12px;color:var(--text2);padding:8px;">月</div>
+        <div style="text-align:center;font-size:12px;color:var(--text2);padding:8px;">火</div>
+        <div style="text-align:center;font-size:12px;color:var(--text2);padding:8px;">水</div>
+        <div style="text-align:center;font-size:12px;color:var(--text2);padding:8px;">木</div>
+        <div style="text-align:center;font-size:12px;color:var(--text2);padding:8px;">金</div>
+        <div style="text-align:center;font-size:12px;color:#4A90D9;padding:8px;">土</div>
+      </div>
+      <div id="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
+    </div>
+    <div id="event-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:var(--bg2);border-radius:16px;padding:32px;width:480px;max-width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <h3 id="event-modal-title" style="margin:0 0 24px;font-size:18px;letter-spacing:2px;">予定を追加</h3>
+        <input type="hidden" id="event-id">
+        <div style="margin-bottom:16px;"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">タイトル *</label><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"><button type="button" onclick="setEventPreset('打ち合わせ')" style="padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text2);font-size:11px;cursor:pointer;">打ち合わせ</button><button type="button" onclick="setEventPreset('訪問')" style="padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text2);font-size:11px;cursor:pointer;">訪問</button><button type="button" onclick="setEventPreset('電話')" style="padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text2);font-size:11px;cursor:pointer;">電話</button><button type="button" onclick="setEventPreset('商談')" style="padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text2);font-size:11px;cursor:pointer;">商談</button><button type="button" onclick="setEventPreset('見積')" style="padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text2);font-size:11px;cursor:pointer;">見積</button><button type="button" onclick="setEventPreset('入金確認')" style="padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text2);font-size:11px;cursor:pointer;">入金確認</button><button type="button" onclick="setEventPreset('その他')" style="padding:4px 10px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text2);font-size:11px;cursor:pointer;">その他</button></div><input id="event-title" type="text" placeholder="直接入力もできます" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;"></div>
+        <div style="margin-bottom:16px;"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">顧客</label><select id="event-customer" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;"><option value="">顧客を選択（任意）</option></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;"><div><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">開始日時 *</label><input id="event-start" type="datetime-local" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;"></div><div><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">終了日時</label><input id="event-end" type="datetime-local" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;"></div></div>
+        <div style="margin-bottom:16px;"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">メモ</label><textarea id="event-memo" rows="3" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);box-sizing:border-box;resize:vertical;"></textarea></div>
+        <div style="margin-bottom:24px;"><label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">色</label><div style="display:flex;gap:8px;"><span onclick="selectEventColor('#4A90D9')" style="width:28px;height:28px;border-radius:50%;background:#4A90D9;cursor:pointer;border:3px solid transparent;" data-color="#4A90D9"></span><span onclick="selectEventColor('#27ae60')" style="width:28px;height:28px;border-radius:50%;background:#27ae60;cursor:pointer;border:3px solid transparent;" data-color="#27ae60"></span><span onclick="selectEventColor('#e67e22')" style="width:28px;height:28px;border-radius:50%;background:#e67e22;cursor:pointer;border:3px solid transparent;" data-color="#e67e22"></span><span onclick="selectEventColor('#e74c3c')" style="width:28px;height:28px;border-radius:50%;background:#e74c3c;cursor:pointer;border:3px solid transparent;" data-color="#e74c3c"></span><span onclick="selectEventColor('#8e44ad')" style="width:28px;height:28px;border-radius:50%;background:#8e44ad;cursor:pointer;border:3px solid transparent;" data-color="#8e44ad"></span></div></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn btn-outline" onclick="closeEventModal()">キャンセル</button><button id="event-delete-btn" class="btn btn-ghost" style="color:#e74c3c;display:none;" onclick="deleteEvent()">削除</button><button class="btn btn-primary" onclick="saveEvent()">保存</button></div>
+      </div>
+    </div>
+  </div>
+
+
+<div id="page-day" style="display:none;position:fixed;top:0;left:220px;right:0;bottom:0;background:var(--bg);z-index:110;overflow-y:auto;padding:32px 36px;">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+    <button onclick="closeDayPage()" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;">← カレンダーに戻る</button>
+    <div id="day-page-title" style="font-size:24px;font-weight:700;letter-spacing:3px;color:var(--gold);"></div>
+    <div style="display:flex;gap:6px;margin-left:auto;">
+      <span style="font-size:11px;color:var(--text3);align-self:center;">日の色：</span>
+      <span onclick="setDayColor('#e74c3c')" style="width:24px;height:24px;border-radius:50%;background:#e74c3c;cursor:pointer;border:2px solid transparent;" data-day-color="#e74c3c"></span>
+      <span onclick="setDayColor('#f39c12')" style="width:24px;height:24px;border-radius:50%;background:#f39c12;cursor:pointer;border:2px solid transparent;" data-day-color="#f39c12"></span>
+      <span onclick="setDayColor('#27ae60')" style="width:24px;height:24px;border-radius:50%;background:#27ae60;cursor:pointer;border:2px solid transparent;" data-day-color="#27ae60"></span>
+      <span onclick="setDayColor('#4A90D9')" style="width:24px;height:24px;border-radius:50%;background:#4A90D9;cursor:pointer;border:2px solid transparent;" data-day-color="#4A90D9"></span>
+      <span onclick="setDayColor('#8e44ad')" style="width:24px;height:24px;border-radius:50%;background:#8e44ad;cursor:pointer;border:2px solid transparent;" data-day-color="#8e44ad"></span>
+      <span onclick="setDayColor('')" style="width:24px;height:24px;border-radius:50%;background:var(--bg3);cursor:pointer;border:2px solid var(--border);font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--text3);">✕</span>
+    </div>
+  </div>
+
+  <!-- 顧客セクション -->
+  <div style="background:var(--bg2);border-radius:12px;padding:20px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:2px;">顧客</div>
+      <button onclick="openDayCustomerSelect()" style="background:var(--gold);border:none;color:#000;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">+ 顧客を追加</button>
+    </div>
+    <div id="day-customers-list"></div>
+  </div>
+
+  <!-- 予定セクション -->
+  <div style="background:var(--bg2);border-radius:12px;padding:20px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:2px;">予定</div>
+      <button onclick="openDayEventAdd()" style="background:var(--gold);border:none;color:#000;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">+ 予定を追加</button>
+    </div>
+    <div id="day-events-list"></div>
+  </div>
+
+  <!-- メモセクション -->
+  <div style="background:var(--bg2);border-radius:12px;padding:20px;margin-bottom:16px;">
+    <div style="font-size:11px;color:var(--text3);letter-spacing:2px;margin-bottom:12px;">メモ</div>
+    <textarea id="day-memo-input" rows="4" placeholder="この日のメモを入力..." autocomplete="off" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea>
+    <button onclick="saveDayMemo()" style="margin-top:8px;background:var(--gold);border:none;color:#000;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">保存</button>
+  </div>
+</div>
+
+<!-- 顧客選択ポップアップ -->
+<div id="day-customer-select-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:12px;padding:24px;width:480px;max-width:90%;max-height:70vh;display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:600;color:var(--text);">顧客を選択</div>
+      <button onclick="closeDayCustomerSelect()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <input type="text" id="day-customer-search" placeholder="顧客名で検索..." oninput="filterDayCustomers(this.value)"
+      style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;box-sizing:border-box;margin-bottom:12px;">
+    <div id="day-customer-select-list" style="overflow-y:auto;flex:1;"></div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;">名前を直接入力して追加</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="day-customer-custom-name" placeholder="例：田中様（未登録）" autocomplete="off"
+          style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;box-sizing:border-box;"
+          onkeyup="if(event.isComposing)return;if(event.key==='Enter')addCustomDayCustomer()">
+        <button onclick="addCustomDayCustomer()" style="background:var(--gold);border:none;color:#000;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;">追加</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

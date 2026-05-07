@@ -389,3 +389,16 @@ window.APP = {
 - git checkoutでindex.htmlを戻すと、ライセンススキップ処理・カレンダーJS・DEVバナーが全部消える
 - index.htmlを修正したあとはキャッシュが残るのでelectronを再起動すること
 - カレンダーHTMLはpage-settingsの直後・scriptタグの直前に入れること
+
+---
+
+### 2026-05-07 作業内容
+- 顧客選択ポップアップの自由入力欄（#day-customer-custom-name）のonkeydownをonkeyupに変更
+  - event.isComposing が true のとき（日本語IME変換中）は早期リターンするよう修正
+  - 日本語入力でEnterを押してもaddCustomDayCustomerが誤発火しなくなった
+- #day-customer-custom-name に autocomplete="off" を追加（ブラウザ補完候補を非表示）
+- #day-memo-input（textarea）に autocomplete="off" を追加
+- Playwrightテスト全13件グリーン確認 ✅
+
+### 次回やること
+- カレンダー機能の追加テスト・UI改善（必要に応じて）

@@ -1483,3 +1483,17 @@ label, .form-label, .detail-label {
 .doc-dropdown-menu button:hover { background: var(--gold-pale); color: var(--gold); }
 .doc-dropdown-menu .danger { color: #e55; }
 .doc-dropdown-menu .danger:hover { background: rgba(220,50,50,0.1); color: #e55; }
+
+/* カレンダーページ専用（center外に配置されているため固定表示） */
+#page-calendar.active {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 220px;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  padding: 32px 36px;
+  background: var(--bg);
+  z-index: 10;
+}

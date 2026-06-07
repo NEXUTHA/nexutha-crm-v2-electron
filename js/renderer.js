@@ -362,7 +362,8 @@ async function renderSettings() {
 async function renderUpdates() {
   const list = document.getElementById('updates-list');
   const currentEl = document.getElementById('current-version-text');
-  if (currentEl) currentEl.textContent = 'v' + CURRENT_VERSION;
+  if (typeof ensureCurrentVersion === 'function') { try { await ensureCurrentVersion(); } catch(e) {} }
+  if (currentEl && CURRENT_VERSION) currentEl.textContent = 'v' + CURRENT_VERSION;
   if (!list) return;
 
   list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:32px;">確認中...</div>';

@@ -79,7 +79,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      additionalArguments: [`--nexutha-isdev=${!app.isPackaged}`],
+      additionalArguments: [`--nexutha-isdev=${!app.isPackaged}`, `--nexutha-version=${app.getVersion()}`],
     },
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 16 },

@@ -6170,33 +6170,66 @@ async function submitLicense() {
 // ================================================================
 // アップデート・お知らせ機能
 // ================================================================
-const CURRENT_VERSION = "2.4.4";
+// 「現在のバージョン」は実行中アプリの実体バージョンを唯一の正とする。ハードコード厳禁。
+//  最優先: main.js が preload 経由で渡す app.getVersion()（=実体の本物の版）
+//  予備:   バックエンド /api/version（version.json）
+let CURRENT_VERSION = (window.electronAPI && window.electronAPI.appVersion) ? window.electronAPI.appVersion : null;
 const VERSION_URL = `${API_BASE}/version`;
+
+// 現在版を確定する。electronAPI.appVersion が無い環境(dev/ブラウザ)では /api/version を使う。
+async function ensureCurrentVersion() {
+  if (CURRENT_VERSION) return CURRENT_VERSION;
+  try {
+    const r = await fetch(VERSION_URL);
+    if (r.ok) { const d = await r.json(); if (d && d.version) CURRENT_VERSION = d.version; }
+  } catch (e) {}
+  return CURRENT_VERSION;
+}
+
+// 起動直後に現在版を確定し、表示にも即反映（お知らせ画面を開く前でも正しい値にする）
+ensureCurrentVersion().then(v => {
+  const el = document.getElementById('current-version-text');
+  if (el && v) el.textContent = 'v' + v;
+});
 
 async function checkUpdate() {
   const dispEl = document.getElementById('current-version-text');
-  if (dispEl) dispEl.textContent = 'v' + CURRENT_VERSION;
+  await ensureCurrentVersion();
+  const cur = CURRENT_VERSION || '?';
+  if (dispEl) dispEl.textContent = 'v' + cur;
   showToast('最新バージョンを確認中...', 3000, licSvg('refresh','ic-only'));
+
+  // 更新履歴・メンテナンス情報はローカル(version.json)から取得
+  let local = {};
+  try { const lr = await fetch(VERSION_URL); if (lr.ok) local = await lr.json(); } catch (e) {}
+
+  // 公開されている最新版は GitHub の releases/latest から取得
+  let latest = cur;
   try {
     const res = await fetch('https://api.github.com/repos/NEXUTHA/nexutha-crm-v2-electron/releases/latest', { headers: { 'Accept': 'application/vnd.github+json' } });
-    if (!res.ok) { showToast('確認に失敗しました'); return null; }
-    const gh = await res.json();
-    const latest = (gh.tag_name || '').replace(/^v/, '');
-    const data = { version: latest };
-    if (latest && compareVersions(latest, CURRENT_VERSION) > 0) {
-      const banner = document.getElementById('update-banner');
-      const bannerText = document.getElementById('update-banner-text');
-      if (banner) banner.style.display = 'flex';
-      if (bannerText) bannerText.textContent = 'v' + latest + ' が利用可能です';
-      showToast('v' + latest + ' にアップデートできます！', 3000, licSvg('sparkles','ic-only'));
-    } else {
-      showToast('最新バージョンです（v' + CURRENT_VERSION + '）', 3000, licSvg('checkcircle','ic-only'));
-    }
-    return data;
-  } catch(e) {
+    if (res.ok) { const gh = await res.json(); latest = (gh.tag_name || '').replace(/^v/, '') || cur; }
+    else if (res.status !== 404) { showToast('確認に失敗しました'); }
+  } catch (e) {
     showToast('ネットワークエラー：確認できませんでした');
-    return null;
   }
+
+  const data = { version: latest, updates: local.updates || [], maintenance: local.maintenance || [], notes: local.notes || '' };
+
+  const banner = document.getElementById('update-banner');
+  const bannerText = document.getElementById('update-banner-text');
+  const badge = document.getElementById('nav-updates-badge');
+  // 現在版とGitHub最新版を正しく比較。新しい時だけ案内を出す。同じ/自分が新しいなら必ず隠す。
+  if (CURRENT_VERSION && compareVersions(latest, CURRENT_VERSION) > 0) {
+    if (banner) banner.style.display = 'flex';
+    if (bannerText) bannerText.textContent = 'v' + latest + ' が利用可能です';
+    if (badge) badge.style.display = 'block';
+    showToast('v' + latest + ' にアップデートできます！', 3000, licSvg('sparkles','ic-only'));
+  } else {
+    if (banner) banner.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    showToast('最新バージョンです（v' + cur + '）', 3000, licSvg('checkcircle','ic-only'));
+  }
+  return data;
 }
 
 function compareVersions(a, b) {

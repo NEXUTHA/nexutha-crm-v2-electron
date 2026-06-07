@@ -60,12 +60,15 @@ jobs:
           pip install -r backend/requirements.txt
           pip install pyinstaller
 
-      # 6) backend を PyInstaller で単一実行ファイルにビルド → dist/backend が生成される
-      - name: backendをビルド (PyInstaller)
+      # 6) backend を PyInstaller(onedir) でビルド → ディレクトリ dist/backend/ が生成される
+      #    （実行ファイル dist/backend/backend ＋ 依存 dist/backend/_internal/）
+      - name: backendをビルド (PyInstaller onedir)
         run: |
           python -m PyInstaller backend.spec --noconfirm --distpath dist --workpath build
-          echo "----- dist/backend を確認 -----"
-          file dist/backend
+          echo "----- dist/backend/ 構成を確認 -----"
+          test -x dist/backend/backend || { echo "::error::dist/backend/backend(実行ファイル)が無い"; exit 1; }
+          file dist/backend/backend
+          echo "ネストMach-O数: $(find dist/backend -name '*.so' -o -name '*.dylib' | wc -l)"
 
       # 7) Node 依存を導入（package-lock.json に厳密一致）
       - name: Node依存を導入

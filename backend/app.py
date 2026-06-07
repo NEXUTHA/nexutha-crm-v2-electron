@@ -20,9 +20,16 @@ from pathlib import Path
 import sys as _sys
 import os as _os
 if getattr(_sys, "frozen", False):
-    # 配布版: 実行ファイルはContents/Resources/backend
+    # 配布版: 実行ファイルの場所は構成で変わる。
+    #   onefile : Contents/Resources/backend            → 親 = Resources/
+    #   onedir  : Contents/Resources/backend/backend    → 親 = Resources/backend/, index.html は Resources/
+    # index.html を含む階層を上方向に探して STATIC_DIR とする（両構成で正しく動く）。
     BASE_DIR = Path(_sys.executable).parent
-    STATIC_DIR_OVERRIDE = BASE_DIR  # Resources/直下にindex.htmlがある
+    STATIC_DIR_OVERRIDE = BASE_DIR
+    for _cand in (BASE_DIR, BASE_DIR.parent, BASE_DIR.parent.parent):
+        if (_cand / "index.html").exists():
+            STATIC_DIR_OVERRIDE = _cand
+            break
 else:
     BASE_DIR = Path(__file__).parent
     STATIC_DIR_OVERRIDE = None

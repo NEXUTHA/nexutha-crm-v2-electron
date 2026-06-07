@@ -219,11 +219,13 @@ function startPythonServer() {
       detached: true
     });
   } else {
-    // 配布版: PyInstallerバイナリ
-    const backendBin = path.join(process.resourcesPath, 'backend');
+    // 配布版: PyInstaller onedir。実行ファイルは Resources/backend/backend、
+    // 依存(_internal/*.so,*.dylib)は同じ backend ディレクトリ内にある。
+    const backendDir = path.join(process.resourcesPath, 'backend');
+    const backendBin = path.join(backendDir, 'backend');
     console.log('Backend (prod):', backendBin);
     pythonProcess = spawn(backendBin, [], {
-      cwd: process.resourcesPath,
+      cwd: backendDir,
       env: { ...process.env },
       detached: true
     });

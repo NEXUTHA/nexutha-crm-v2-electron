@@ -135,7 +135,7 @@
     <div class="brand-nexutha">NEXUTHA</div>
     <div class="brand-product">CRM SYSTEM</div>
     <div style="width:100%;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:10px 0;opacity:0.5;"></div>
-    <div class="brand-client" id="sidebar-client" data-tip="データはサーバーに保存されています。&#10;Docker経由で動作しています。" style="cursor:help;color:var(--gold);opacity:0.8;">オンライン動作中</div>
+    <div class="brand-client" id="sidebar-client" data-tip="データはこのPC内に保存されています。&#10;ローカルで安全に動作しています。" style="cursor:help;color:var(--gold);opacity:0.8;">オンライン動作中</div>
   </div>
   <div class="nav-section">
     <div id="dev-banner" style="display:none;background:#e74c3c;color:#fff;font-size:10px;padding:4px 8px;border-radius:4px;margin-bottom:8px;text-align:center;font-weight:700;">⚠️ 開発版 DEV</div>
@@ -5782,7 +5782,9 @@ function loadContrast() {
 // NEXUTHA API Bridge Layer
 // IndexedDB → バックエンドAPI への橋渡し
 // ================================================================
-const API_BASE = location.origin + '/api';   // ページ配信元と同一originに自動追従（開発版:3456 / 配布版:9876）
+// http(s)で配信されていれば配信元originに自動追従（開発版:3456 / 配布版:9876）。
+// file:// など想定外の開き方をされた場合は配布版backend(9876)にフォールバックして通信を維持する。
+const API_BASE = (location.protocol === 'http:' || location.protocol === 'https:' ? location.origin : 'http://localhost:9876') + '/api';
 const USE_BACKEND = true; // falseにするとIndexedDBモードに戻る
 
 const NAPI = {

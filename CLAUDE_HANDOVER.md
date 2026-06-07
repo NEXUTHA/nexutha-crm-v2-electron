@@ -293,7 +293,7 @@ window.APP = {
 | 組織 | NEXUTHA |
 | 2段階認証 | SMS認証・設定済み（2026-04-18） |
 | リカバリーコード | ダウンロード済み・安全な場所に保管すること |
-| 最新リリース | v2.4.0（2026-06-07公開） |
+| 最新リリース | v2.4.1（2026-06-07公開／v2.4.0は不具合のため削除） |
 
 ---
 
@@ -478,3 +478,29 @@ window.APP = {
 #### 注意（未対応・次回検討）
 - **x64(Intel)版dmgのバックエンドはarm64バイナリ**（PyInstallerをarm64機でビルドのため）。Intel実機での動作は未確認。これは従来リリースと同条件。Intelを正式サポートするならx64機（or クロスビルド/Rosetta）でのbackend生成が必要
 - `<option>`内アイコン（電話/メール/訪問のドロップダウン）は現状テキストのみ（別タスク）
+
+---
+
+### 2026-06-07 緊急修正 v2.4.1（v2.4.0は配布版が壊れており削除→修正版を再公開）✅
+**公開済み：** https://github.com/NEXUTHA/nexutha-crm-v2-electron/releases/tag/v2.4.1 （Latest）
+
+#### 何が起きたか（重大インシデント・再発防止のため必読）
+v2.4.0で配布版のポートを9876に分離した際、**`index.html` の `API_BASE` が `'http://localhost:3456/api'` に固定**のままだった。配布版はページもbackendも9876なのに、画面の全データ通信（顧客・書類・自社情報・ライセンス・バックアップ・カレンダー約40箇所）が**3456へアクセスして全失敗**。＝配布版が実質使えない状態でリリースしてしまった。
+- **原因**：ポート分離（main.js / app.py）を変えたのに API_BASE を直さなかった。さらに私の実機確認が「backendに直接curl」だけで、**画面（レンダラー）の実fetchを見ていなかった**ため見逃した。
+- **検知をすり抜けた理由**：開発版は全部3456で一致するため Playwright も私のcurlも通ってしまった。
+
+#### 修正内容
+- `index.html`：`const API_BASE = location.origin + '/api';`（**ページ配信元と同一originに自動追従**。開発版3456・配布版9876どちらでも自分のbackendに接続）
+- バージョン 2.4.1（package.json / version.json / index.html CURRENT_VERSION）
+
+#### 対応順序（実施済み）
+1. **まず壊れたv2.4.0を即削除して自動配信を停止**（`gh release delete v2.4.0 --cleanup-tag --yes`／リリース・リモートタグ消失を確認）
+2. API_BASE修正 → 開発版Playwright13件グリーン＋**画面に顧客データ表示を目視確認**
+3. v2.4.1へ版上げ → 前回手順でビルド/署名/公証/staple/latest-mac.yml再計算/dev DB復元
+4. **配布版.appをPlaywrightのexecutablePathで起動し、レンダラーに顧客8件が表示されること・DEVバナー非表示・API_BASE=9876追従をスクリーンショットで目視確認**（curlで済ませない）
+5. v2.4.1公開（アセット名＝latest-mac.yml url一致を確認）
+
+#### 教訓（次回必ず守る）
+- **ポートやAPI接続先を変えたら `index.html` の `API_BASE` も必ず確認**（現在は location.origin 追従なので原則触らなくてよい）
+- **リリース前の実機確認は必ず「画面（レンダラー）が実データを表示するところ」まで**。backendへの直接curlだけでは配布版の不具合を見逃す。配布版.appは `electron.launch({ executablePath: 'dist/mac-arm64/NEXUTHA CRM.app/Contents/MacOS/NEXUTHA CRM' })` でPlaywright起動すれば画面の評価・撮影ができる
+- 問題が出たら**まず配信停止（リリース削除）してから**落ち着いて直す

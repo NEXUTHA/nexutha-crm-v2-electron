@@ -1,6 +1,6 @@
 {
   "name": "nexutha-crm-dev",
-  "version": "2.4.5",
+  "version": "2.4.6",
   "description": "NEXUTHA CRM - 完全ローカル型顧客管理システム",
   "main": "main.js",
   "author": "Yamashita Yasuhide / NEXUTHA",
@@ -103,6 +103,7 @@
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.82",
+    "electron-log": "^5.4.4",
     "electron-updater": "^6.8.3"
   },
   "productName": "NEXUTHA CRM"

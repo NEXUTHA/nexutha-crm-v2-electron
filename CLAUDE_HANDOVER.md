@@ -651,3 +651,41 @@ Secretの登録は `gh secret set <名前>` で行う（リポジトリ: NEXUTHA
 - 配布版の不具合調査は、まず `~/Library/Logs/NEXUTHA CRM/main.log` を見る（electron-logで残るようになった）。
 - macOS自動更新は「正規の/Applicationsインストール＋隔離無し」が前提。dmgはFinderドラッグでインストールさせる。
 - 自動更新の検証は「更新元に修正版を入れて、次版へ実際に入れ替わるか」まで実機で確認する。
+
+---
+
+## 2026-06-07 お知らせ画面のバージョン誤表示＋アップデート反映不全の修正（v2.4.8 / v2.4.9）
+
+### 症状
+実体・version.json・/api/version は全て新版を返すのに、お知らせ画面の「現在のバージョン」だけ
+古い版(例 v2.4.4)を表示し、最新版を使用中なのに「今すぐ更新」を促す矛盾が出ていた。
+
+### 真因（2段階）
+1. **ハードコード(v2.4.8で修正)**: index.html に `const CURRENT_VERSION = "2.4.4"` が直書きされ、
+   表示も更新判定もこの固定値を使っていた。
+2. **★HTTPキャッシュ(v2.4.9で修正・より根深い)**: レンダラは http://localhost:9876 から
+   index.html/js/css を読む。ElectronのHTTPディスクキャッシュはアプリ更新後も残り、旧版の
+   index.html を配信し続ける。配布版は clearCache していなかったため、自動更新で実体が新しく
+   なっても**画面(HTML/JS)は古いキャッシュのまま**＝あらゆるUI/JS修正がユーザーに届かない。
+   （v2.4.8のハードコード修正自体もキャッシュに阻まれ反映されなかった）
+
+### 修正
+- preload.js: main.js から app.getVersion() を additionalArguments 経由で受け、electronAPI.appVersion を公開。
+- index.html: CURRENT_VERSION を electronAPI.appVersion（予備 /api/version）から動的取得。
+  現在版とGitHub最新を正しく比較し、同版ならバナー/バッジを必ず隠す。更新履歴は version.json から復元。
+- main.js: 前回起動時とアプリ版が変わっていれば `session.defaultSession.clearCache()` を
+  ウィンドウ生成前に実行（last-run-version.txt を userData に保存して判定）。
+  ★clearCache であって clearStorageData ではない＝Cookie/localStorage/DB/顧客データは消さない。
+
+### 実機 before/after 実証（Playwright + CDP、推測でなく画面）
+- BEFORE: 2.4.7(ハードコード版)を正規インストール→お知らせ画面が「v2.4.4」誤表示・更新バナー表示を確認。
+- 2.4.7→2.4.9 を自動更新(検知→DL→今すぐ再起動→quitAndInstall)で実体入れ替え。
+- AFTER: 手動キャッシュ操作を一切せず通常起動→「v2.4.9」正表示・更新バナー非表示を確認。
+  ログに `バージョン変更を検出(初回 → 2.4.9)。HTTPキャッシュをクリアします` が出て、初回起動で自動healするのを確認。
+  同版での再起動では `バージョン変更なし。キャッシュ維持`（毎回は消さない）。
+
+### 今後の鉄則
+- localhost配信のレンダラ資産(index.html/js/css)はElectronのHTTPキャッシュに残る。UI/JS修正を
+  確実に届けるため、版変更時の clearCache は必須（今回 main.js に恒久実装済み）。
+- 配布版の画面検証は Playwright connectOverCDP（アプリを --remote-debugging-port=9222 で起動）で
+  実DOM/表示を読み取り＋スクショ。curlやソース確認だけでは「キャッシュ由来の古い画面」を見逃す。

@@ -824,7 +824,7 @@ def save_license(data: dict):
 def get_version():
     import json as _json
     try:
-        with open(BASE_DIR.parent / "version.json", "r") as f:
+        with open(STATIC_DIR / "version.json", "r") as f:
             return _json.load(f)
     except:
         return {"version": "2.1.0", "updates": []}

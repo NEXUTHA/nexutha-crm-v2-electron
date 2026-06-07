@@ -293,7 +293,7 @@ window.APP = {
 | 組織 | NEXUTHA |
 | 2段階認証 | SMS認証・設定済み（2026-04-18） |
 | リカバリーコード | ダウンロード済み・安全な場所に保管すること |
-| 最新リリース | v2.3.3（2026-04-24公開） |
+| 最新リリース | v2.4.0（2026-06-07公開） |
 
 ---
 
@@ -442,3 +442,39 @@ window.APP = {
   - ファイル選択だけでは自動インポートされない（問題1）/ 日本語ヘッダーインポート（カンマ入りメモ"VIP, 重要"完全一致）/ 英語ヘッダーインポート / エクスポート出力（BOM＋日本語ヘッダー＋カンマ値クォート）/ export→import 往復一致
   - 既存Playwright 13件もグリーン（回帰なし・テスト改変なし＝掟4）
 - 変更ファイル：index.html のみ（git checkout厳禁＝掟17）
+
+---
+
+### 2026-06-07 v2.4.0 リリース（署名・公証・staple・GitHub Releases公開まで完了）✅
+**公開済み：** https://github.com/NEXUTHA/nexutha-crm-v2-electron/releases/tag/v2.4.0 （Latest）
+
+#### 重要：開発版/配布版の分離方法を「isPackagedゲート化」に変更（恒久対応）
+従来は package.json の productName を "NEXUTHA CRM DEV" に手書き変更して分離していたが、**本番ビルド時にDEV表記・DEVバナー・ライセンス回避キーが混入する危険があった**ため、`app.isPackaged` による自動分岐に変更した。今後は productName 等を手で書き換える必要はない。
+- `preload.js`：main.js から `additionalArguments: --nexutha-isdev=<bool>` を受け取り `window.electronAPI.isDev` を公開
+- `main.js`：ポート `app.isPackaged ? 9876 : 3456`、ウィンドウtitle `app.isPackaged ? 'NEXUTHA CRM' : 'NEXUTHA CRM DEV'`
+- `backend/app.py`：`uvicorn.run(port = 9876 if frozen else 3456)`（配布版はPyInstallerでfrozen→9876）
+- `index.html`：DEVバナーは `id="dev-banner"` 既定 `display:none`、load時に `electronAPI.isDev` の時だけ表示／ライセンス回避キー `NXTH-0001-3C6B-BF0B` は `electronAPI.isDev` の時のみ有効（配布版で無効）
+- `package.json`：productName を "NEXUTHA CRM"（配布版の正式名）に戻した
+
+#### ポートの確定（掟11/掟14関連・旧記述を訂正）
+**配布版=9876 / 開発版=3456** をコードで強制（main.js・app.py 双方）。本ドキュメント内の旧「配布版9876/開発版3456」記述は現状と一致。
+
+#### リリース手順の実績と次回の注意（重要）
+1. バージョンは3ファイル更新：`package.json` `version.json` `index.html`(CURRENT_VERSION) ＋ version.json に updates エントリ追加
+2. **バックエンドはdist/backendが消えているので必ず再ビルド**：`python3.10 -m PyInstaller backend.spec --clean --noconfirm`（pyenv 3.10.6にPyInstaller 6.19.0）。出力 `dist/backend`（arm64・約37MB）
+3. **check-before-build.sh は dev DB(backend/data/nexutha.db>50KB)があると失敗する**。ビルド前に退避（例：`mv ... nexutha.db.prebuild-bak`）、ビルド後に復元すること
+4. `npm run build:mac`：署名＋afterSign(scripts/notarize.js)で**.appのみ公証**される（dmgは未公証・未staple）
+5. **dmgのstapleには dmg自体の公証が必要**：`xcrun notarytool submit "<dmg>" --keychain-profile nexutha-notarization --wait` → `xcrun stapler staple "<dmg>"`（arm64・x64の2つ）
+6. **staple後はdmgのバイトが変わるため `dist/latest-mac.yml` の sha512(base64)とsizeを必ず再計算して修正**（しないと electron-updater のハッシュ検証に失敗し全顧客の自動更新が壊れる）。`openssl dgst -sha512 -binary <dmg> | openssl base64 -A`、size は `stat -f%z`
+7. GitHubアセット名は **ドット形式**（例 `NEXUTHA.CRM-2.4.0-arm64.dmg`）。latest-mac.yml の url と完全一致させること（不一致だと更新取得不可）
+8. 公開：`gh release create v2.4.0 --target main --title v2.4.0 --notes ... <arm64.dmg> <x64.dmg> latest-mac.yml`
+
+#### 検証実績（本番品質確認）
+- 開発版(3456) Playwright 13件グリーン（ゲート化後・回帰なし）
+- ビルドした配布版.appを実機起動：フリーズ版バックエンドが9876で起動・本番DBの顧客8件取得・配信フロントが2.4.0・DEVバナー非表示・ライセンス回避キーisDev限定 を確認
+- 署名 `spctl -t exec`=Notarized Developer ID accepted、dmg `stapler validate`=worked、notarytool=Accepted×2
+- latest-mac.yml の url/size がリリースアセットと一致することを確認
+
+#### 注意（未対応・次回検討）
+- **x64(Intel)版dmgのバックエンドはarm64バイナリ**（PyInstallerをarm64機でビルドのため）。Intel実機での動作は未確認。これは従来リリースと同条件。Intelを正式サポートするならx64機（or クロスビルド/Rosetta）でのbackend生成が必要
+- `<option>`内アイコン（電話/メール/訪問のドロップダウン）は現状テキストのみ（別タスク）

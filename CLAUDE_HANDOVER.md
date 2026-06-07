@@ -611,3 +611,43 @@ Secretの登録は `gh secret set <名前>` で行う（リポジトリ: NEXUTHA
 同名タグ/リリースが既にあると `gh release create` は失敗する。やり直す場合は
 `gh release delete vX.X.X --cleanup-tag --yes`（リリースとリモートタグを削除）してから打ち直す。
 ※これは破壊的操作なので手動で慎重に。
+
+---
+
+## 2026-06-07 自動更新「適用されない」問題の根本修正（v2.4.6）🔧
+
+### 症状（購入者環境で発生）
+検知○・ダウンロード○なのに「再起動して適用」しても古い版のまま入れ替わらない。ログも残らない。
+
+### 真因（3つ）
+1. **App Translocation（主因）**：隔離属性(com.apple.quarantine)が残ったままのアプリはmacOSが
+   読み取り専用のランダムパス(`/private/var/folders/.../AppTranslocation/...`)で実行する。
+   electron-updater(Squirrel.Mac)は実行中バンドルを置換しようとするが読み取り専用で書けず**無言で失敗**。
+   再起動しても/Applications本体は隔離付きのまま→また隔離実行→永遠に古いまま。
+   ※「所有者・書込権限あり」は/Applications本体の話で、実際に動いているのは別の読み取り専用コピー。
+2. **quitAndInstallの呼び方**：macOS既知のレース/quit阻害対処をしていなかった。
+3. **electron-log未導入**：configがconsoleのみ＝配布版でログがどこにも残らず原因追跡不能だった。
+
+### 修正（main.js）
+- electron-log導入。`~/Library/Logs/NEXUTHA CRM/main.log` に全更新イベントを記録。
+- quitAndInstallをdevelar公式パターンに：
+  `setImmediate(() => { app.removeAllListeners('window-all-closed'); pythonProcess.kill(); BrowserWindow.getAllWindows().forEach(w=>w.close()); autoUpdater.quitAndInstall(false); })`
+- 起動時・手動チェック時に `process.execPath.includes('/AppTranslocation/')` でtranslocationを検知し、
+  該当時は自動更新を試みず正しい再インストール手順を案内する。
+
+### 実機実証（推測でなく実測）
+2.4.6を/Applicationsに正規インストール(隔離なし)→2.4.7をリリース→2.4.6起動→2.4.7検知→DL→
+「今すぐ再起動」→`quitAndInstall を実行`→**version=2.4.7で自動再起動**→/Applications実体が2.4.7に。
+署名=Notarized Developer ID accepted、非translocationを確認。main.logに全工程が残ることも確認。
+
+### ★既存ユーザー（壊れた版を使用中）への重要事項★
+**自動更新の「適用」を実行するのは更新元(今入っている版)のコード。** 2.4.5以前の壊れた版/隔離状態の
+ユーザーは、修正版を自動更新で受け取れない場合がある。その場合は**一度だけ手動再インストール**が必要：
+`お客様向け_自動更新が効かない時の再インストール手順.md` を参照（最新dmgをFinderで/Applicationsに
+ドラッグ置換、またはターミナルで `xattr -dr com.apple.quarantine "/Applications/NEXUTHA CRM.app"`）。
+これで隔離が解け、以降は自動更新が正常動作する。
+
+### 今後の鉄則
+- 配布版の不具合調査は、まず `~/Library/Logs/NEXUTHA CRM/main.log` を見る（electron-logで残るようになった）。
+- macOS自動更新は「正規の/Applicationsインストール＋隔離無し」が前提。dmgはFinderドラッグでインストールさせる。
+- 自動更新の検証は「更新元に修正版を入れて、次版へ実際に入れ替わるか」まで実機で確認する。

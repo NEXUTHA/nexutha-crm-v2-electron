@@ -18,6 +18,20 @@ log.info('==== アプリ起動 ==== version=' + app.getVersion() + ' isPackaged=
 log.info('実行パス(execPath)=' + process.execPath);
 
 // ================================================================
+// 多重起動防止（白画面・ポート競合の主因対策）
+//   同じアプリが二重に起動するとバックエンドが2つ立ち上がり、ポート9876の
+//   奪い合い→片方が起動失敗→古い方が応答 or 接続拒否で白画面、という事故が起きる。
+//   2つ目の起動は即終了し、既存ウィンドウを前面に出す。
+//   ※ translocation修復(app.relaunch)時は、古いインスタンスがapp.exit(0)で
+//     ロックを解放してから新インスタンスが取得するため競合しない。
+// ================================================================
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  log.warn('既に起動済みのため、この2つ目のインスタンスを終了します');
+  app.quit();
+}
+
+// ================================================================
 // アップデート後の「画面が古いまま」問題への対処
 //   レンダラは http://localhost:9876 から index.html/js/css を読み込むが、
 //   ElectronのHTTPディスクキャッシュはアプリ更新後も残り、旧バージョンの
@@ -131,12 +145,63 @@ function handleInstallLocation() {
 
 let mainWindow;
 let pythonProcess;
+let isQuitting = false;   // アプリ終了中（バックエンドの自動再起動を抑止）
+let isUpdating = false;   // 更新適用中（quitAndInstall。バックエンド再起動を抑止）
+let reloadAttempts = 0;   // 本体読み込みの再試行回数（指数バックオフ用）
+let reloadTimer = null;   // 再読み込みの予約タイマー
 // 配布版（パッケージ済み）は9876、開発版は3456でポートを完全分離
 const PORT = app.isPackaged ? 9876 : 3456;
+
+// ================================================================
+// ポート衛生: 残存バックエンドの掃除
+//   PyInstaller製バックエンドは「親(起動役)＋子(本体)」の2プロセス構成で、
+//   過去の更新・異常終了で子プロセスが生き残り9876を握り続けることがある。
+//   その状態だと新バージョンのバックエンドが起動できず、古い版が配信され続けたり
+//   接続拒否で白画面になる。起動直後にポートの占有者を強制終了して必ず再取得する。
+//   ※ 9876/3456 は本アプリ専用ポート。占有者は自分自身のバックエンドに限られる。
+// ================================================================
+function reclaimPort() {
+  try {
+    const { execSync } = require('child_process');
+    let out = '';
+    try {
+      out = execSync(`/usr/sbin/lsof -nP -iTCP:${PORT} -sTCP:LISTEN -t`, { encoding: 'utf8' }).trim();
+    } catch (e) { return; } // 占有者なし(lsofは非ゼロ終了)→何もしない
+    if (!out) return;
+    out.split('\n').forEach((pidStr) => {
+      const pid = Number((pidStr || '').trim());
+      if (pid && pid !== process.pid) {
+        log.warn(`ポート${PORT}を占有する残存プロセス pid=${pid} を終了します`);
+        try { process.kill(pid, 'SIGKILL'); } catch (e) { log.warn('残存プロセスkill失敗: ' + e); }
+      }
+    });
+  } catch (e) {
+    log.warn('reclaimPortで例外: ' + e);
+  }
+}
+
+// バックエンドをプロセスグループごと確実に終了する（子プロセスの取り残し防止）
+function killBackend() {
+  if (!pythonProcess) return;
+  const pid = pythonProcess.pid;
+  try {
+    if (pid) {
+      // detached:true で起動しているのでプロセスグループ(-pid)ごと終了できる
+      try { process.kill(-pid, 'SIGTERM'); }
+      catch (e) { try { pythonProcess.kill('SIGTERM'); } catch (_) {} }
+    }
+  } catch (e) {
+    log.warn('killBackend失敗: ' + e);
+  }
+  pythonProcess = null;
+}
 
 function startPythonServer() {
   const isDev = !app.isPackaged;
 
+  // detached:true でバックエンドを新しいプロセスグループのリーダーにする。
+  // こうすると killBackend() が子プロセスごと(-pid)確実に終了でき、
+  // 9876を握ったままの取り残し(=更新後に古い版が残る/白画面)を防げる。
   if (isDev) {
     // 開発版: Pythonで直接起動
     const pythonCmd = '/Users/runa.yasu/.pyenv/versions/3.10.6/bin/python3.10';
@@ -144,7 +209,8 @@ function startPythonServer() {
     console.log('Backend (dev):', pythonCmd, backendPath);
     pythonProcess = spawn(pythonCmd, [backendPath], {
       cwd: __dirname,
-      env: { ...process.env }
+      env: { ...process.env },
+      detached: true
     });
   } else {
     // 配布版: PyInstallerバイナリ
@@ -152,31 +218,96 @@ function startPythonServer() {
     console.log('Backend (prod):', backendBin);
     pythonProcess = spawn(backendBin, [], {
       cwd: process.resourcesPath,
-      env: { ...process.env }
+      env: { ...process.env },
+      detached: true
     });
   }
 
+  log.info('バックエンド起動 pid=' + (pythonProcess && pythonProcess.pid));
   pythonProcess.stdout.on('data', (data) => console.log(`Backend: ${data}`));
   pythonProcess.stderr.on('data', (data) => console.error(`Backend Error: ${data}`));
-  pythonProcess.on('error', (err) => console.error('バックエンドエラー:', err));
+  pythonProcess.on('error', (err) => { console.error('バックエンドエラー:', err); log.error('バックエンドspawnエラー: ' + err); });
+  // バックエンドが予期せず落ちたら、終了/更新中でない限り自動復旧する（白画面の自己回復）
+  pythonProcess.on('exit', (code, signal) => {
+    log.warn(`バックエンド終了 code=${code} signal=${signal}`);
+    if (isQuitting || isUpdating) return;
+    log.info('バックエンドを自動再起動します');
+    reclaimPort();
+    startPythonServer();
+    if (mainWindow) { showSplash('error'); loadMainApp(); }
+  });
 }
 
-function waitForServer(callback, retries = 60) {
+function waitForServer(onReady, retries = 60, onTimeout) {
   const req = http.get(`http://localhost:${PORT}/api/health`, (res) => {
     if (res.statusCode === 200) {
-      callback();
+      res.resume();
+      onReady();
     } else {
-      setTimeout(() => waitForServer(callback, retries - 1), 1000);
+      res.resume();
+      retry();
     }
   });
-  req.on('error', () => {
+  req.on('error', retry);
+  req.setTimeout(2000, () => { try { req.destroy(); } catch (e) {} });
+  function retry() {
     if (retries > 0) {
-      setTimeout(() => waitForServer(callback, retries - 1), 1000);
+      setTimeout(() => waitForServer(onReady, retries - 1, onTimeout), 1000);
     } else {
-      console.error('サーバー起動タイムアウト');
+      log.error('サーバー起動タイムアウト');
+      if (typeof onTimeout === 'function') onTimeout();
     }
-  });
+  }
   req.end();
+}
+
+// ================================================================
+// スプラッシュ／エラー画面（純粋な白画面を絶対に出さないための同梱ローカル画面）
+//   mode='loading' = 起動中スピナー / mode='error' = 再試行中表示
+// ================================================================
+function showSplash(mode) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const file = path.join(__dirname, 'loading.html');
+  mainWindow.loadFile(file, { hash: mode === 'error' ? 'error' : 'loading' })
+    .catch((e) => log.warn('スプラッシュ表示失敗: ' + e));
+}
+
+// ================================================================
+// バックエンドの健全化を待って本体(localhost)を読み込む。
+//   準備できるまではスプラッシュ、タイムアウト時はエラー画面＋再試行。
+// ================================================================
+function loadMainApp() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  waitForServer(
+    () => {
+      log.info('バックエンド健全 → 本体を読み込みます');
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.loadURL(`http://localhost:${PORT}`)
+          .catch((e) => { log.error('本体loadURL失敗: ' + e); showSplash('error'); scheduleReload(); });
+      }
+    },
+    60,
+    () => {
+      log.error('バックエンド起動タイムアウト → エラー画面を表示し再試行します');
+      showSplash('error');
+      scheduleReload();
+    }
+  );
+}
+
+// 読み込み失敗時に指数バックオフで再読み込みを予約（永久白画面の防止）
+function scheduleReload() {
+  if (reloadTimer || isQuitting || isUpdating) return;
+  reloadAttempts++;
+  const delay = Math.min(1000 * Math.pow(2, reloadAttempts - 1), 15000); // 1,2,4,8,15s上限
+  log.info(`本体の再読み込みを${delay}ms後に試行します(${reloadAttempts}回目)`);
+  reloadTimer = setTimeout(() => {
+    reloadTimer = null;
+    if (isQuitting || isUpdating) return;
+    // バックエンドが落ちていれば掃除して再起動してから読み込む
+    if (!pythonProcess) { reclaimPort(); startPythonServer(); }
+    loadMainApp();
+  }, delay);
 }
 
 function createWindow() {
@@ -199,8 +330,46 @@ function createWindow() {
   });
 
 
-  mainWindow.loadURL(`http://localhost:${PORT}`);
+  // まず同梱のスプラッシュを即表示（純粋な白画面を出さない）。
+  // バックエンドが健全になってから loadMainApp() で本体(localhost)へ差し替える。
+  showSplash('loading');
   if (!app.isPackaged) mainWindow.webContents.openDevTools(); // 開発時のみ
+
+  // 読み込み失敗を捕捉して自動復帰（永久白画面の防止）
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDesc, validatedURL, isMainFrame) => {
+    if (errorCode === -3) return; // ERR_ABORTED（loadURL差し替え時の正常な中断）は無視
+    if (!isMainFrame) return;
+    // スプラッシュ等のローカルファイル読み込み失敗は対象外
+    if (!validatedURL || !validatedURL.startsWith('http://localhost')) return;
+    log.error(`本体読み込み失敗 code=${errorCode} desc=${errorDesc} url=${validatedURL}`);
+    showSplash('error');
+    scheduleReload();
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    const url = mainWindow.webContents.getURL();
+    if (url && url.startsWith(`http://localhost:${PORT}`)) {
+      reloadAttempts = 0; // 成功したのでバックオフをリセット
+      log.info('アプリ本体の読み込み完了');
+    }
+  });
+
+  mainWindow.webContents.on('render-process-gone', (event, details) => {
+    log.error('レンダラプロセス消失: ' + JSON.stringify(details));
+    if (isQuitting || isUpdating) return;
+    showSplash('error');
+    scheduleReload();
+  });
+
+  mainWindow.on('unresponsive', () => log.warn('ウィンドウが応答なし'));
+
+  // レンダラ(画面)のJS例外を electron-log に記録（preload経由）。
+  // 今後JSエラーで白画面になっても main.log に原因が残る。
+  const { ipcMain } = require('electron');
+  ipcMain.removeAllListeners('renderer-error');
+  ipcMain.on('renderer-error', (ev, info) => {
+    try { log.error('レンダラエラー: ' + JSON.stringify(info)); } catch (e) { log.error('レンダラエラー(整形不可)'); }
+  });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
@@ -325,10 +494,12 @@ function setupAutoUpdater() {
         //  3) 全ウィンドウを明示的にclose
         //  4) quitAndInstall(false) を呼ぶ
         // 参考: electron-userland/electron-builder#1604 (maintainer develarの回答)
+        isUpdating = true; // バックエンドのexitで自動再起動しないように
+        if (reloadTimer) { clearTimeout(reloadTimer); reloadTimer = null; }
         setImmediate(() => {
           app.removeAllListeners('window-all-closed');
-          // 子プロセス(Pythonバックエンド)を確実に終了させてから入れ替え
-          if (pythonProcess) { try { pythonProcess.kill(); } catch (e) { log.warn('backend kill失敗: ' + e); } }
+          // 子プロセス(Pythonバックエンド)をプロセスグループごと確実に終了させてから入れ替え
+          killBackend();
           BrowserWindow.getAllWindows().forEach(w => { try { w.close(); } catch (e) {} });
           autoUpdater.quitAndInstall(false);
         });
@@ -376,13 +547,22 @@ app.whenReady().then(async () => {
     }
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-  startPythonServer();
-  waitForServer(() => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-      setupAutoUpdater();
+
+  // 2つ目の起動が来たら既存ウィンドウを前面に出す
+  app.on('second-instance', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
     }
   });
+
+  // 起動順: ポート掃除 → ウィンドウ(スプラッシュ即表示) → バックエンド起動 →
+  //         自動更新設定 → 健全化を待って本体読み込み。
+  reclaimPort();
+  createWindow();      // スプラッシュを即表示（白画面を出さない）
+  startPythonServer();
+  setupAutoUpdater();
+  loadMainApp();       // /api/health 200 を待って localhost を読み込み
 
   // Cmd+Option+I でDevToolsを開閉
   globalShortcut.register('CommandOrControl+Alt+I', () => {
@@ -411,16 +591,23 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => {
-  if (pythonProcess) pythonProcess.kill();
+  killBackend();
   if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  if (BrowserWindow.getAllWindows().length === 0) {
+    // バックエンドが落ちていれば掃除して立て直してから読み込む
+    if (!pythonProcess) { reclaimPort(); startPythonServer(); }
+    createWindow();
+    loadMainApp();
+  }
 });
 
 app.on('before-quit', () => {
-  if (pythonProcess) pythonProcess.kill();
+  isQuitting = true;
+  if (reloadTimer) { clearTimeout(reloadTimer); reloadTimer = null; }
+  killBackend();
 });
 
 

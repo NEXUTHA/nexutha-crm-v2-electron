@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
+  <title>NEXUTHA CRM</title>
+  <style>
+    :root { --gold:#c9a96a; --bg:#0e0e10; --text:#e8e8ea; --text2:#9a9aa0; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      height:100%; width:100%;
+      background:var(--bg); color:var(--text);
+      font-family:-apple-system, BlinkMacSystemFont, "Hiragino Sans", "Helvetica Neue", sans-serif;
+      -webkit-user-select:none; user-select:none;
+      overflow:hidden;
+    }
+    body { display:flex; align-items:center; justify-content:center; -webkit-app-region:drag; }
+    .wrap { text-align:center; padding:40px; }
+    .brand { font-size:22px; letter-spacing:8px; font-weight:600; margin-bottom:28px; color:var(--text); }
+    .spinner {
+      width:42px; height:42px; margin:0 auto 22px;
+      border:3px solid rgba(201,169,106,0.18);
+      border-top-color:var(--gold);
+      border-radius:50%;
+      animation:spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .msg { font-size:14px; color:var(--text2); line-height:1.7; }
+    .sub { font-size:12px; color:#6a6a70; margin-top:10px; }
+    /* エラー時 */
+    .err-icon { font-size:34px; margin-bottom:18px; }
+    #loading-view, #error-view { display:none; }
+    body.mode-loading #loading-view { display:block; }
+    body.mode-error #error-view { display:block; }
+  </style>
+</head>
+<body class="mode-loading">
+  <div class="wrap">
+    <div class="brand">NEXUTHA CRM</div>
+    <div id="loading-view">
+      <div class="spinner"></div>
+      <div class="msg">起動しています…</div>
+      <div class="sub">少々お待ちください</div>
+    </div>
+    <div id="error-view">
+      <div class="spinner"></div>
+      <div class="msg">起動の準備をしています…</div>
+      <div class="sub">接続を再試行しています。このままお待ちください。</div>
+    </div>
+  </div>
+  <script>
+    // main.js が location.hash で 'loading' / 'error' を切り替える
+    function applyMode() {
+      var mode = (location.hash || '#loading').replace('#', '');
+      document.body.className = (mode === 'error') ? 'mode-error' : 'mode-loading';
+    }
+    window.addEventListener('hashchange', applyMode);
+    applyMode();
+  </script>
+</body>
+</html>

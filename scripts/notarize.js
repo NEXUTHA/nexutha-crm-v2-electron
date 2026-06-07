@@ -13,6 +13,13 @@ exports.default = async function notarizing(context) {
   const { electronPlatformName, appOutDir } = context;
   if (electronPlatformName !== 'darwin') return;
 
+  // ローカル検証用の明示的スキップ（CI/本番では絶対に設定しない）。
+  // 例: SKIP_NOTARIZE=1 npm run build:mac で、署名のみの素早い動作確認ビルドを作る。
+  if (process.env.SKIP_NOTARIZE === '1') {
+    console.log('SKIP_NOTARIZE=1 のため公証をスキップします（ローカル検証ビルド）');
+    return;
+  }
+
   const appName = context.packager.appInfo.productFilename;
   const appPath = `${appOutDir}/${appName}.app`;
 

@@ -12,3 +12,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openAI: (model) => ipcRenderer.send('open-ai-window', model),
   checkForUpdates: () => ipcRenderer.send('check-for-updates')
 });
+
+// 画面(レンダラ)のJS例外を main.js 経由で electron-log に記録する。
+// preloadはページと同じwindowのイベントを購読できるため、index.html を
+// 触らずに未捕捉エラー・未処理Promiseを拾える。今後JSエラーで白画面に
+// なっても ~/Library/Logs/NEXUTHA CRM/main.log に原因が残る。
+window.addEventListener('error', (e) => {
+  try {
+    ipcRenderer.send('renderer-error', {
+      kind: 'error',
+      message: e.message,
+      source: e.filename,
+      line: e.lineno,
+      col: e.colno,
+      stack: e.error && e.error.stack ? String(e.error.stack) : undefined
+    });
+  } catch (_) {}
+});
+window.addEventListener('unhandledrejection', (e) => {
+  try {
+    const r = e.reason;
+    ipcRenderer.send('renderer-error', {
+      kind: 'unhandledrejection',
+      message: r && r.message ? r.message : String(r),
+      stack: r && r.stack ? String(r.stack) : undefined
+    });
+  } catch (_) {}
+});

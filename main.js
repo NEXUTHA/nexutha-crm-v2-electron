@@ -2,6 +2,7 @@ const { app, BrowserWindow, shell, Menu, dialog, globalShortcut } = require('ele
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 const http = require('http');
 
@@ -15,6 +16,33 @@ log.transports.file.level = 'info';
 log.transports.console.level = 'info';
 log.info('==== アプリ起動 ==== version=' + app.getVersion() + ' isPackaged=' + app.isPackaged);
 log.info('実行パス(execPath)=' + process.execPath);
+
+// ================================================================
+// アップデート後の「画面が古いまま」問題への対処
+//   レンダラは http://localhost:9876 から index.html/js/css を読み込むが、
+//   ElectronのHTTPディスクキャッシュはアプリ更新後も残り、旧バージョンの
+//   index.html等を配信し続ける（=UI/JSの修正がユーザーに届かない）。
+//   そこで、前回起動時とアプリ版が変わっていたらHTTPキャッシュを一度クリアし、
+//   必ず新しい画面リソースを読み込ませる。データ(Cookie/localStorage/DB)は消さない。
+// ================================================================
+async function clearHttpCacheOnVersionChange() {
+  try {
+    const { session } = require('electron');
+    const verFile = path.join(app.getPath('userData'), 'last-run-version.txt');
+    let last = null;
+    try { last = fs.readFileSync(verFile, 'utf8').trim(); } catch (e) {}
+    const cur = app.getVersion();
+    if (last !== cur) {
+      log.info(`バージョン変更を検出(${last || '初回'} → ${cur})。HTTPキャッシュをクリアします`);
+      await session.defaultSession.clearCache();
+      try { fs.writeFileSync(verFile, cur); } catch (e) { log.warn('版ファイル書込失敗: ' + e); }
+    } else {
+      log.info('バージョン変更なし。キャッシュ維持');
+    }
+  } catch (e) {
+    log.warn('キャッシュクリア処理でエラー: ' + e);
+  }
+}
 
 let mainWindow;
 let pythonProcess;
@@ -240,7 +268,9 @@ function setupAutoUpdater() {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // アップデート後に古い画面が出る問題を防ぐため、版が変わっていればHTTPキャッシュをクリア
+  await clearHttpCacheOnVersionChange();
   // macOSのコピペメニューを有効化
   const template = [
     { label: 'NEXUTHA CRM' },

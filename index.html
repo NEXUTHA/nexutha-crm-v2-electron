@@ -5782,7 +5782,7 @@ function loadContrast() {
 // NEXUTHA API Bridge Layer
 // IndexedDB → バックエンドAPI への橋渡し
 // ================================================================
-const API_BASE = 'http://localhost:3456/api';
+const API_BASE = location.origin + '/api';   // ページ配信元と同一originに自動追従（開発版:3456 / 配布版:9876）
 const USE_BACKEND = true; // falseにするとIndexedDBモードに戻る
 
 const NAPI = {
@@ -6150,7 +6150,7 @@ async function submitLicense() {
 // ================================================================
 // アップデート・お知らせ機能
 // ================================================================
-const CURRENT_VERSION = "2.4.0";
+const CURRENT_VERSION = "2.4.1";
 const VERSION_URL = `${API_BASE}/version`;
 
 async function checkUpdate() {

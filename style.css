@@ -247,6 +247,20 @@ td { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: n
 }
 .nav-icon { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.6; }
 .nav-item:hover .nav-icon, .nav-item.active .nav-icon { opacity: 1; }
+
+/* Lucide インラインアイコン（絵文字置き換え 2026-06-07） */
+.ic, .ic-only, .ic-sm, .ic-card, .ic-chk, .ic-mini {
+  display: inline-block; flex-shrink: 0;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  vertical-align: -3px;
+}
+.ic { width: 15px; height: 15px; margin-right: 6px; }
+.ic-only { width: 16px; height: 16px; }
+.ic-sm { width: 13px; height: 13px; margin-right: 5px; vertical-align: -2px; }
+.ic-card { width: 26px; height: 26px; vertical-align: middle; }
+.ic-chk { width: 14px; height: 14px; vertical-align: -2px; }
+.ic-mini { width: 11px; height: 11px; margin-left: 3px; vertical-align: -1px; }
 .nav-item-text {
   font-family: 'Josefin Sans', sans-serif;
   font-weight: 300; letter-spacing: 2px; font-size: 11px;

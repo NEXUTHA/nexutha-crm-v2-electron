@@ -166,7 +166,7 @@
       設定
     </div>
     <div class="nav-item" id="nav-updates" onclick="showPage('updates')" data-page="updates" data-tip="アップデート・お知らせ">
-      <span class="nav-icon" style="font-size:18px;">🔔</span>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span id="nav-updates-badge" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;background:#f87171;border-radius:50%;"></span>
       お知らせ
     </div>
@@ -264,7 +264,7 @@
       <button class="btn btn-primary" onclick="openAddModal()">+ 新規登録</button>
     </div>
     <div class="industry-tab-bar" id="industry-tab-bar">
-      <button class="ind-tab active" onclick="filterByIndustry('all',this)">🏢 全業種</button>
+      <button class="ind-tab active" onclick="filterByIndustry('all',this)"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M16 10h.01M8 10h.01M12 14h.01M16 14h.01M8 14h.01"/></svg>全業種</button>
       <button class="ind-tab" onclick="filterByIndustry('construction',this)">建築</button>
       <button class="ind-tab" onclick="filterByIndustry('beauty',this)">美容</button>
       <button class="ind-tab" onclick="filterByIndustry('freelance',this)">フリーランス</button>
@@ -297,19 +297,19 @@
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
       <div id="doc-type-card-estimate" onclick="switchDocTab('estimate',this)"
         style="cursor:pointer;border:2px solid var(--gold);border-radius:10px;padding:16px;text-align:center;background:rgba(200,168,75,0.08);transition:all 0.2s;">
-        <div style="font-size:22px;margin-bottom:6px;">📄</div>
+        <div style="margin-bottom:6px;"><svg class="ic-card" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
         <div style="font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px;">見積書</div>
         <div style="font-size:10px;color:var(--text3);margin-top:4px;">ESTIMATE</div>
       </div>
       <div id="doc-type-card-invoice" onclick="switchDocTab('invoice',this)"
         style="cursor:pointer;border:2px solid var(--border);border-radius:10px;padding:16px;text-align:center;background:transparent;transition:all 0.2s;">
-        <div style="font-size:22px;margin-bottom:6px;">📋</div>
+        <div style="margin-bottom:6px;"><svg class="ic-card" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></div>
         <div style="font-size:13px;font-weight:700;color:var(--text2);letter-spacing:1px;">請求書</div>
         <div style="font-size:10px;color:var(--text3);margin-top:4px;">INVOICE</div>
       </div>
       <div id="doc-type-card-receipt" onclick="switchDocTab('receipt',this)"
         style="cursor:pointer;border:2px solid var(--border);border-radius:10px;padding:16px;text-align:center;background:transparent;transition:all 0.2s;">
-        <div style="font-size:22px;margin-bottom:6px;">🧾</div>
+        <div style="margin-bottom:6px;"><svg class="ic-card" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></div>
         <div style="font-size:13px;font-weight:700;color:var(--text2);letter-spacing:1px;">領収書</div>
         <div style="font-size:10px;color:var(--text3);margin-top:4px;">RECEIPT</div>
       </div>
@@ -330,7 +330,7 @@
                   style="width:100%;padding-right:32px;box-sizing:border-box;">
                 <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;font-size:10px;">▼</span>
               </div>
-              <button class="btn btn-ghost btn-sm" onclick="clearDocCustomer()" data-tip="クリア" style="flex-shrink:0;">✕</button>
+              <button class="btn btn-ghost btn-sm" onclick="clearDocCustomer()" data-tip="クリア" style="flex-shrink:0;"><svg class="ic-only" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <input type="hidden" id="doc-customer">
             <div id="doc-customer-dropdown" style="display:none;position:absolute;top:100%;left:0;right:40px;background:var(--bg2);border:1px solid var(--gold);border-radius:6px;z-index:9999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
@@ -435,7 +435,7 @@
           <div style="display:flex;gap:6px;">
             <button id="tax-on-btn" class="btn btn-primary btn-sm" onclick="setTaxMode(true)" style="font-size:11px;" data-tip="消費税10%を自動計算">税込（10%）</button>
             <button id="tax-off-btn" class="btn btn-outline btn-sm" onclick="setTaxMode(false)" style="font-size:11px;" data-tip="税額を加算しない">税なし</button>
-            <button class="btn btn-outline btn-sm" onclick="showItemTemplates()" style="font-size:11px;" data-tip="テンプレートから入力">📋 テンプレ</button>
+            <button class="btn btn-outline btn-sm" onclick="showItemTemplates()" style="font-size:11px;" data-tip="テンプレートから入力"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>テンプレ</button>
           </div>
         </div>
         <table class="items-table">
@@ -452,7 +452,7 @@
         </table>
         <div style="display:flex;gap:12px;margin-top:8px;">
           <button onclick="addDocItem()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;padding:4px 0;">+ 行を追加</button>
-          <button onclick="saveAsTemplate()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 0;">💾 テンプレに保存</button>
+          <button onclick="saveAsTemplate()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 0;"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>テンプレに保存</button>
         </div>
       </div>
 
@@ -473,7 +473,7 @@
               <label class="form-label" data-tip="PDFの備考欄に表示">備考</label>
               <div style="display:flex;gap:6px;">
                 <textarea id="doc-memo" rows="2" placeholder="納期・条件など" style="flex:1;resize:vertical;"></textarea>
-                <button class="btn btn-ghost btn-sm" onclick="loadMemoTemplate()" style="align-self:flex-start;" data-tip="テンプレを使う">📝</button>
+                <button class="btn btn-ghost btn-sm" onclick="loadMemoTemplate()" style="align-self:flex-start;" data-tip="テンプレを使う"><svg class="ic-only" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
               </div>
             </div>
           </div>
@@ -503,7 +503,7 @@
             <div style="display:flex;gap:8px;justify-content:flex-end;">
               <button class="btn btn-outline" onclick="closeDocModal()" style="padding:10px 20px;">キャンセル</button>
               <button class="btn btn-primary" onclick="saveDoc()" style="padding:10px 32px;font-size:14px;font-weight:700;">
-                💾 保存 &amp; PDF
+                <svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存 &amp; PDF
               </button>
             </div>
           </div>
@@ -541,9 +541,9 @@
       </div>
       <div id="doc-bulk-bar" style="display:none;padding:8px 0;margin-bottom:8px;display:none;align-items:center;gap:8px;">
         <span id="doc-checked-count" style="font-size:12px;color:var(--text2);">0件選択中</span>
-        <button onclick="bulkDeleteDocs()" class="btn btn-danger btn-sm">🗑 一括削除</button>
-        <button onclick="bulkCopyDocs()" class="btn btn-ghost btn-sm">📋 一括複製</button>
-        <button onclick="clearDocChecks()" class="btn btn-ghost btn-sm">✕ 選択解除</button>
+        <button onclick="bulkDeleteDocs()" class="btn btn-danger btn-sm"><svg class="ic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>一括削除</button>
+        <button onclick="bulkCopyDocs()" class="btn btn-ghost btn-sm"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>一括複製</button>
+        <button onclick="clearDocChecks()" class="btn btn-ghost btn-sm"><svg class="ic" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>選択解除</button>
       </div>
       <div style="overflow-x:auto;">
         <table class="data-table">
@@ -568,23 +568,24 @@
       </div>
     </div>
     <div class="card">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">CSVの1行目に name, company, tel, email, address, memo のヘッダーを入れてください。</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">CSVの1行目に 顧客名,会社名,電話番号,メールアドレス,住所,メモ（英語の name,company,tel,email,address,memo でも可）のヘッダーを入れてください。</div>
       <div class="form-group">
         <label class="form-label">CSVファイルを選択</label>
         <div style="display:flex;gap:10px;align-items:center;">
           <label for="csv-import-file" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--text2);transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
-            📂 ファイルを選択
+            <svg class="ic" viewBox="0 0 24 24"><path d="M6 14l1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>ファイルを選択
           </label>
           <span id="csv-file-name" style="font-size:12px;color:var(--text3);">未選択</span>
         </div>
-        <input type="file" id="csv-import-file" accept=".csv" style="display:none;" onchange="document.getElementById('csv-file-name').textContent=this.files[0]?.name||'未選択';importCSV()">
+        <input type="file" id="csv-import-file" accept=".csv" style="display:none;" onchange="document.getElementById('csv-file-name').textContent=this.files[0]?.name||'未選択'">
       </div>
-      <button class="btn btn-primary" onclick="document.getElementById('csv-import-file').click()">📥 インポート開始</button>
+      <button class="btn btn-primary" onclick="importCSV()"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>インポート開始</button>
+      <button class="btn btn-outline" style="margin-left:10px;" onclick="exportCSV()" data-tip="今ある顧客データを&#10;CSVファイルに書き出します"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSVをエクスポート</button>
       <div id="import-result" style="margin-top:14px;color:var(--success);font-weight:600;font-size:12px;"></div>
     </div>
     <div class="card">
       <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase;">Sample Format</div>
-      <pre style="background:var(--bg);padding:14px;border-radius:var(--radius);font-size:11px;color:var(--text2);border:1px solid var(--border);">name,company,tel,email,address,memo
+      <pre style="background:var(--bg);padding:14px;border-radius:var(--radius);font-size:11px;color:var(--text2);border:1px solid var(--border);">顧客名,会社名,電話番号,メールアドレス,住所,メモ
 田中太郎,株式会社サンプル,03-0000-0000,tanaka@example.com,東京都渋谷区,VIP
 山田花子,合同会社テスト,06-0000-0000,yamada@test.co.jp,大阪府大阪市,</pre>
       <button class="btn btn-outline btn-sm" style="margin-top:12px;" onclick="downloadSample()">サンプルCSVをダウンロード</button>
@@ -601,7 +602,7 @@
     <!-- アップデートバナー -->
     <div id="update-banner" style="display:none;background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.4);border-radius:8px;padding:16px 20px;margin-bottom:24px;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:14px;font-weight:600;color:#c8a84b;">🎉 新しいバージョンがあります</div>
+        <div style="font-size:14px;font-weight:600;color:#c8a84b;"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/></svg>新しいバージョンがあります</div>
         <div id="update-banner-text" style="font-size:12px;color:var(--text2);margin-top:4px;"></div>
       </div>
       <button onclick="doUpdate()" style="background:#c8a84b;border:none;color:#000;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;margin-left:16px;">今すぐ更新</button>
@@ -613,7 +614,7 @@
           <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">現在のバージョン</div>
           <div id="current-version-text" style="font-size:20px;font-weight:700;color:var(--gold);"></div>
         </div>
-        <button onclick="checkUpdate()" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;">🔄 更新を確認</button>
+        <button onclick="checkUpdate()" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;"><svg class="ic" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>更新を確認</button>
       </div>
     </div>
     <!-- メンテナンス情報 -->
@@ -668,7 +669,7 @@
 
       <div class="settings-accordion" id="acc-backup">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">💾 データバックアップ</div><div class="acc-desc">バックアップ・リストア</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>データバックアップ</div><div class="acc-desc">バックアップ・リストア</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -676,15 +677,15 @@
           <div>
             <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">顧客・書類・添付ファイルを全てJSONで保存します</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="exportBackup(false)">📦 バックアップを作成</button>
-              <button class="btn btn-outline btn-sm" onclick="exportBackup(true)" data-tip="JSONを暗号化して保存します（セキュア）">🔒 暗号化して保存</button>
+              <button class="btn btn-primary" onclick="exportBackup(false)"><svg class="ic" viewBox="0 0 24 24"><path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>バックアップを作成</button>
+              <button class="btn btn-outline btn-sm" onclick="exportBackup(true)" data-tip="JSONを暗号化して保存します（セキュア）"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>暗号化して保存</button>
             </div>
           </div>
         </div>
         <div class="settings-row" style="margin-top:12px;">
           <div>
             <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">バックアップファイルからデータを復元します</div>
-            <button class="btn btn-outline" onclick="document.getElementById('restore-input').click()">♻️ リストアする</button>
+            <button class="btn btn-outline" onclick="document.getElementById('restore-input').click()"><svg class="ic" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>リストアする</button>
             <input type="file" id="restore-input" accept=".json" style="display:none;" onchange="importBackup(this)">
           </div>
         </div>
@@ -695,7 +696,7 @@
 
       <div class="settings-accordion" id="acc-mail">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">✉️ メール文面テンプレート</div><div class="acc-desc">メール送付時の文面を登録</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>メール文面テンプレート</div><div class="acc-desc">メール送付時の文面を登録</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -717,7 +718,7 @@
 
       <div class="settings-accordion" id="acc-data">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🗄️ データ管理</div><div class="acc-desc">ストレージ使用量・CSV</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>データ管理</div><div class="acc-desc">ストレージ使用量・CSV</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -733,7 +734,7 @@
 
       <div class="settings-accordion" id="acc-tax">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🧮 消費税・端数処理設定</div><div class="acc-desc">税率・端数・源泉徴収の設定</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>消費税・端数処理設定</div><div class="acc-desc">税率・端数・源泉徴収の設定</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -781,7 +782,7 @@
 
       <div class="settings-accordion" id="acc-ui">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🎨 UIスタイル</div><div class="acc-desc">デザインスタイルを変更</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".7" style="fill:currentColor"/><circle cx="17.5" cy="10.5" r=".7" style="fill:currentColor"/><circle cx="8.5" cy="7.5" r=".7" style="fill:currentColor"/><circle cx="6.5" cy="12.5" r=".7" style="fill:currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.83-.44-1.12-.29-.29-.44-.65-.44-1.12a1.64 1.64 0 0 1 1.67-1.67H16c3.05 0 5.55-2.5 5.55-5.55C21.96 6.01 17.46 2 12 2z"/></svg>UIスタイル</div><div class="acc-desc">デザインスタイルを変更</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -795,7 +796,7 @@
               <div style="width:50px;height:3px;background:rgba(200,168,75,0.2);border-radius:2px;"></div>
             </div>
             <div style="padding:6px 12px;background:#0f0f0f;font-size:11px;color:#c8a84b;text-align:center;">Premium</div>
-            <div id="ui-check-premium" style="position:absolute;top:6px;right:6px;color:#c8a84b;font-size:14px;">✓</div>
+            <div id="ui-check-premium" style="position:absolute;top:6px;right:6px;color:#c8a84b;font-size:14px;"><svg class="ic-chk" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
           <div onclick="applyUIStyle('saas')" id="ui-style-saas"
             style="cursor:pointer;border:2px solid var(--border);border-radius:8px;overflow:hidden;position:relative;">
@@ -805,7 +806,7 @@
               <div style="width:50px;height:3px;background:rgba(99,102,241,0.2);border-radius:2px;"></div>
             </div>
             <div style="padding:6px 12px;background:#fff;font-size:11px;color:#6366f1;text-align:center;border-top:1px solid #e5e5e5;">Modern SaaS</div>
-            <div id="ui-check-saas" style="display:none;position:absolute;top:6px;right:6px;color:#6366f1;font-size:14px;">✓</div>
+            <div id="ui-check-saas" style="display:none;position:absolute;top:6px;right:6px;color:#6366f1;font-size:14px;"><svg class="ic-chk" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
           <div onclick="applyUIStyle('friendly')" id="ui-style-friendly"
             style="cursor:pointer;border:2px solid var(--border);border-radius:8px;overflow:hidden;position:relative;">
@@ -815,7 +816,7 @@
               <div style="width:50px;height:3px;background:rgba(16,185,129,0.2);border-radius:4px;"></div>
             </div>
             <div style="padding:6px 12px;background:#fff;font-size:11px;color:#10b981;text-align:center;border-top:1px solid #d1fae5;">Friendly</div>
-            <div id="ui-check-friendly" style="display:none;position:absolute;top:6px;right:6px;color:#10b981;font-size:14px;">✓</div>
+            <div id="ui-check-friendly" style="display:none;position:absolute;top:6px;right:6px;color:#10b981;font-size:14px;"><svg class="ic-chk" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
           <div onclick="applyUIStyle('startup')" id="ui-style-startup"
             style="cursor:pointer;border:2px solid var(--border);border-radius:8px;overflow:hidden;position:relative;">
@@ -825,7 +826,7 @@
               <div style="width:50px;height:3px;background:rgba(139,92,246,0.2);border-radius:4px;"></div>
             </div>
             <div style="padding:6px 12px;background:#111113;font-size:11px;color:#8b5cf6;text-align:center;border-top:1px solid rgba(139,92,246,0.2);">Startup</div>
-            <div id="ui-check-startup" style="display:none;position:absolute;top:6px;right:6px;color:#8b5cf6;font-size:14px;">✓</div>
+            <div id="ui-check-startup" style="display:none;position:absolute;top:6px;right:6px;color:#8b5cf6;font-size:14px;"><svg class="ic-chk" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
         </div>
         </div>
@@ -834,7 +835,7 @@
 
       <div class="settings-accordion" id="acc-theme">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🖌️ テーマカスタマイズ</div><div class="acc-desc">アクセントカラーを変更</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>テーマカスタマイズ</div><div class="acc-desc">アクセントカラーを変更</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -859,7 +860,7 @@
 
       <div class="settings-accordion" id="acc-pdf">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">📄 PDF出力設定</div><div class="acc-desc">PDF生成時の動作を設定</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>PDF出力設定</div><div class="acc-desc">PDF生成時の動作を設定</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -883,7 +884,7 @@
 
       <div class="settings-accordion" id="acc-layout">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">📐 書類レイアウト設定</div><div class="acc-desc">ロゴ・印鑑の配置を設定</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="7" rx="1"/><rect x="3" y="14" width="9" height="7" rx="1"/><rect x="16" y="14" width="5" height="7" rx="1"/></svg>書類レイアウト設定</div><div class="acc-desc">ロゴ・印鑑の配置を設定</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -936,7 +937,7 @@
 
       <div class="settings-accordion" id="acc-invoice">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🔢 インボイス登録番号</div><div class="acc-desc">インボイス番号を設定</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>インボイス登録番号</div><div class="acc-desc">インボイス番号を設定</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -953,7 +954,7 @@
 
       <div class="settings-accordion" id="acc-filelimit">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">📎 添付ファイル上限</div><div class="acc-desc">ファイル添付の最大サイズを設定</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>添付ファイル上限</div><div class="acc-desc">ファイル添付の最大サイズを設定</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -969,7 +970,7 @@
 
       <div class="settings-accordion" id="acc-colortheme">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🎨 カラーテーマ</div><div class="acc-desc">カラーテーマを選択</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".7" style="fill:currentColor"/><circle cx="17.5" cy="10.5" r=".7" style="fill:currentColor"/><circle cx="8.5" cy="7.5" r=".7" style="fill:currentColor"/><circle cx="6.5" cy="12.5" r=".7" style="fill:currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.83-.44-1.12-.29-.29-.44-.65-.44-1.12a1.64 1.64 0 0 1 1.67-1.67H16c3.05 0 5.55-2.5 5.55-5.55C21.96 6.01 17.46 2 12 2z"/></svg>カラーテーマ</div><div class="acc-desc">カラーテーマを選択</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -986,7 +987,7 @@
       </div>
       <div class="settings-accordion" id="acc-font">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🔤 フォント設定</div><div class="acc-desc">UIのフォントスタイルを選択</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>フォント設定</div><div class="acc-desc">UIのフォントスタイルを選択</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -996,7 +997,7 @@
       </div>
       <div class="settings-accordion" id="acc-company" style="margin-top:0;">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🏢 自社情報</div><div class="acc-desc">会社名・住所・ロゴ・印鑑を設定</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M16 10h.01M8 10h.01M12 14h.01M16 14h.01M8 14h.01"/></svg>自社情報</div><div class="acc-desc">会社名・住所・ロゴ・印鑑を設定</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -1016,7 +1017,7 @@
       <option value="yucho">ゆうちょ銀行を使用</option>
     </select>
   </div>
-  <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:600;">🏦 通常銀行</div>
+  <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:600;"><svg class="ic" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>通常銀行</div>
   <div id="pc-s-m-bank-normal">
     <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">銀行名</div><input type="text" id="pc-s-bank-name-m" placeholder="例: ○○銀行" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;box-sizing:border-box;"></div>
     <div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">支店名</div><input type="text" id="pc-s-bank-branch-m" placeholder="例: ○○支店" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;box-sizing:border-box;"></div>
@@ -1030,7 +1031,7 @@
     </div>
     <div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">口座名義（カナ）</div><input type="text" id="pc-s-bank-holder-m" placeholder="例: カブシキガイシャ ○○" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;box-sizing:border-box;"></div>
   </div>
-  <div style="margin:12px 0 8px;font-size:12px;color:var(--text2);font-weight:600;">🏦 ゆうちょ銀行</div>
+  <div style="margin:12px 0 8px;font-size:12px;color:var(--text2);font-weight:600;"><svg class="ic" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>ゆうちょ銀行</div>
   <div id="pc-s-m-bank-yucho">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
       <div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">記号（5桁）</div><input type="text" id="pc-s-bank-yucho-kigo-m" placeholder="例: 10290" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;box-sizing:border-box;"></div>
@@ -1078,7 +1079,7 @@
 
       <div class="settings-accordion" id="acc-ai">
         <div class="settings-accordion-header" onclick="toggleAccordion(this)">
-          <div><div class="acc-title">🤖 AIアシスタント</div><div class="acc-desc">ローカルAIプラグインを選択・インストール</div></div>
+          <div><div class="acc-title"><svg class="ic" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>AIアシスタント</div><div class="acc-desc">ローカルAIプラグインを選択・インストール</div></div>
           <span class="acc-icon">▼</span>
         </div>
         <div class="settings-accordion-body">
@@ -1233,8 +1234,8 @@
         <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border);">
           <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">⚠️ データはサーバー（SQLite）に保存されています。定期的にバックアップを取ることをお勧めします。</div>
           <div style="display:flex;gap:12px;flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="exportCSV()" data-tip="顧客データをCSVファイルで&#10;保存します（月1回推奨）">📥 顧客データをバックアップ</button>
-            <button class="btn btn-ghost" onclick="showPage('import')" data-page="import" data-tip="CSVでデータを一括インポート" data-tip="バックアップしたCSVから&#10;データを復元します">📤 バックアップから復元</button>
+            <button class="btn btn-primary" onclick="exportCSV()" data-tip="顧客データをCSVファイルで&#10;保存します（月1回推奨）"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>顧客データをバックアップ</button>
+            <button class="btn btn-ghost" onclick="showPage('import')" data-page="import" data-tip="CSVでデータを一括インポート" data-tip="バックアップしたCSVから&#10;データを復元します"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>バックアップから復元</button>
           </div>
         </div>
         <div class="page-title" style="font-size:22px;letter-spacing:4px;margin-bottom:16px;">コントラスト調整</div>
@@ -1313,7 +1314,7 @@
       <option value="yucho">ゆうちょ銀行を使用</option>
     </select>
   </div>
-  <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:600;">🏦 通常銀行</div>
+  <div style="margin-bottom:8px;font-size:12px;color:var(--text2);font-weight:600;"><svg class="ic" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>通常銀行</div>
   <div id="pc-s-bank-normal">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
       <div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">銀行名</div><input type="text" id="pc-s-bank-name" placeholder="例: ○○銀行" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;box-sizing:border-box;"></div>
@@ -1331,7 +1332,7 @@
       <div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">口座名義（カナ）</div><input type="text" id="pc-s-bank-holder" placeholder="例: カブシキガイシャ ○○" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;box-sizing:border-box;"></div>
     </div>
   </div>
-  <div style="margin:12px 0 8px;font-size:12px;color:var(--text2);font-weight:600;">🏦 ゆうちょ銀行</div>
+  <div style="margin:12px 0 8px;font-size:12px;color:var(--text2);font-weight:600;"><svg class="ic" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>ゆうちょ銀行</div>
   <div id="pc-s-bank-yucho">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
       <div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">記号（5桁）</div><input type="text" id="pc-s-bank-yucho-kigo" placeholder="例: 10290" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:4px;font-size:12px;box-sizing:border-box;"></div>
@@ -1389,11 +1390,11 @@
       <div class="ai-header-sub">NEXUTHA AI</div>
     </div>
     <div class="ai-btn-grid">
-      <button class="ai-action-btn gold" onclick="startAdd()" data-tip="AIが質問しながら&#10;顧客情報を登録します">👤 登録</button>
-      <button class="ai-action-btn" onclick="startDoc('estimate')" data-tip="見積書をウィザード式で&#10;作成してPDF出力">📄 見積書</button>
-      <button class="ai-action-btn" onclick="startDoc('invoice')" data-tip="請求書をウィザード式で&#10;作成してPDF出力">📋 請求書</button>
-      <button class="ai-action-btn" onclick="startDoc('receipt')" data-tip="領収書をウィザード式で&#10;作成してPDF出力">🧾 領収書</button>
-      <button class="ai-action-btn" onclick="startChat()" data-tip="使い方の質問や&#10;操作の相談ができます">💬 相談</button>
+      <button class="ai-action-btn gold" onclick="startAdd()" data-tip="AIが質問しながら&#10;顧客情報を登録します"><svg class="ic-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>登録</button>
+      <button class="ai-action-btn" onclick="startDoc('estimate')" data-tip="見積書をウィザード式で&#10;作成してPDF出力"><svg class="ic-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>見積書</button>
+      <button class="ai-action-btn" onclick="startDoc('invoice')" data-tip="請求書をウィザード式で&#10;作成してPDF出力"><svg class="ic-sm" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>請求書</button>
+      <button class="ai-action-btn" onclick="startDoc('receipt')" data-tip="領収書をウィザード式で&#10;作成してPDF出力"><svg class="ic-sm" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>領収書</button>
+      <button class="ai-action-btn" onclick="startChat()" data-tip="使い方の質問や&#10;操作の相談ができます"><svg class="ic-sm" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>相談</button>
     </div>
   </div>
   <!-- メッセージエリア（スクロール） -->
@@ -1402,7 +1403,7 @@
   <!-- フッター：戻る・Menu + 入力欄（下固定） -->
   <div class="ai-footer">
     <div class="ai-nav-btns">
-      <button class="ai-nav-btn" onclick="handleGoBack()">← 1つ戻る</button>
+      <button class="ai-nav-btn" onclick="handleGoBack()"><svg class="ic" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>1つ戻る</button>
       <button class="ai-nav-btn" onclick="showWelcome()">最初から</button>
     </div>
     <div class="ai-input-area">
@@ -1488,8 +1489,8 @@
     <div style="font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:3px;color:#c8a84b;">PDF PREVIEW</div>
     <div style="display:flex;gap:8px;align-items:center;">
       <span id="preview-doc-label" style="font-size:11px;color:#7a7060;"></span>
-      <button onclick="closePdfPreview()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#7a7060;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:11px;">✕ キャンセル</button>
-      <button onclick="confirmPdfDownload()" style="background:#c8a84b;border:none;color:#000;padding:6px 20px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:1px;">✓ OK・ダウンロード</button>
+      <button onclick="closePdfPreview()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#7a7060;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:11px;"><svg class="ic" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>キャンセル</button>
+      <button onclick="confirmPdfDownload()" style="background:#c8a84b;border:none;color:#000;padding:6px 20px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:1px;"><svg class="ic" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>OK・ダウンロード</button>
     </div>
   </div>
   <!-- メインエリア -->
@@ -1508,15 +1509,15 @@
         <!-- ドラッグ可能な画像ハンドル -->
         <div id="preview-logo-handle" style="display:none;position:absolute;cursor:move;user-select:none;border:1px dashed rgba(200,168,75,0.6);">
           <img id="preview-logo-img" style="pointer-events:none;display:block;">
-          <div style="position:absolute;top:-18px;left:0;font-size:9px;background:rgba(200,168,75,0.9);color:#000;padding:1px 4px;border-radius:2px;white-space:nowrap;">ロゴ ↕↔</div>
+          <div style="position:absolute;top:-18px;left:0;font-size:9px;background:rgba(200,168,75,0.9);color:#000;padding:1px 4px;border-radius:2px;white-space:nowrap;">ロゴ <svg class="ic-mini" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg></div>
         </div>
         <div id="preview-stamp-handle" style="display:none;position:absolute;cursor:move;user-select:none;border:1px dashed rgba(200,100,100,0.6);">
           <img id="preview-stamp-img" style="pointer-events:none;display:block;">
-          <div style="position:absolute;top:-18px;left:0;font-size:9px;background:rgba(200,100,100,0.9);color:#fff;padding:1px 4px;border-radius:2px;white-space:nowrap;">会社印 ↕↔</div>
+          <div style="position:absolute;top:-18px;left:0;font-size:9px;background:rgba(200,100,100,0.9);color:#fff;padding:1px 4px;border-radius:2px;white-space:nowrap;">会社印 <svg class="ic-mini" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg></div>
         </div>
         <div id="preview-hanko-handle" style="display:none;position:absolute;cursor:move;user-select:none;border:1px dashed rgba(100,200,100,0.6);">
           <img id="preview-hanko-img" style="pointer-events:none;display:block;">
-          <div style="position:absolute;top:-18px;left:0;font-size:9px;background:rgba(100,200,100,0.9);color:#000;padding:1px 4px;border-radius:2px;white-space:nowrap;">担当者印 ↕↔</div>
+          <div style="position:absolute;top:-18px;left:0;font-size:9px;background:rgba(100,200,100,0.9);color:#000;padding:1px 4px;border-radius:2px;white-space:nowrap;">担当者印 <svg class="ic-mini" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg></div>
         </div>
       </div>
     </div>
@@ -1648,9 +1649,9 @@
         </div>
         <!-- アクションボタン -->
         <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:14px;">
-          <button onclick="peSaveDoc()" style="width:100%;background:#c8a84b;border:none;color:#000;padding:10px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;letter-spacing:1px;">💾 保存</button>
-          <button onclick="confirmPdfDownload()" style="width:100%;background:transparent;border:1px solid rgba(200,168,75,0.4);color:#c8a84b;padding:10px;border-radius:4px;cursor:pointer;font-size:12px;">📄 PDFダウンロード</button>
-          <button onclick="peDeleteDoc()" style="width:100%;background:transparent;border:1px solid rgba(248,113,113,0.4);color:#f87171;padding:10px;border-radius:4px;cursor:pointer;font-size:12px;">🗑 削除</button>
+          <button onclick="peSaveDoc()" style="width:100%;background:#c8a84b;border:none;color:#000;padding:10px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;letter-spacing:1px;"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</button>
+          <button onclick="confirmPdfDownload()" style="width:100%;background:transparent;border:1px solid rgba(200,168,75,0.4);color:#c8a84b;padding:10px;border-radius:4px;cursor:pointer;font-size:12px;"><svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>PDFダウンロード</button>
+          <button onclick="peDeleteDoc()" style="width:100%;background:transparent;border:1px solid rgba(248,113,113,0.4);color:#f87171;padding:10px;border-radius:4px;cursor:pointer;font-size:12px;"><svg class="ic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>削除</button>
         </div>
       </div>
       <!-- ADJUSTパネル -->
@@ -1688,10 +1689,10 @@
         <button id="toggle-hanko-btn" onclick="togglePreviewHandle('hanko')" style="width:100%;background:transparent;border:1px solid rgba(255,100,100,0.4);color:#f87171;padding:4px;border-radius:4px;cursor:pointer;font-size:11px;">非表示にする</button>
       </div>
       <div style="margin-bottom:12px;">
-        <button onclick="resetPreviewPositions()" style="width:100%;background:transparent;border:1px solid rgba(200,168,75,0.3);color:#c8a84b;padding:8px;border-radius:4px;cursor:pointer;font-size:11px;" data-tip="配置をデフォルトに戻します">↺ 配置をリセット</button>
+        <button onclick="resetPreviewPositions()" style="width:100%;background:transparent;border:1px solid rgba(200,168,75,0.3);color:#c8a84b;padding:8px;border-radius:4px;cursor:pointer;font-size:11px;" data-tip="配置をデフォルトに戻します"><svg class="ic" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>配置をリセット</button>
       </div>
       <div style="margin-bottom:12px;">
-        <button onclick="savePreviewAsDefault()" style="width:100%;background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.4);color:#c8a84b;padding:8px;border-radius:4px;cursor:pointer;font-size:11px;" data-tip="この配置を次回のデフォルトとして保存">💾 この配置をデフォルトに保存</button>
+        <button onclick="savePreviewAsDefault()" style="width:100%;background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.4);color:#c8a84b;padding:8px;border-radius:4px;cursor:pointer;font-size:11px;" data-tip="この配置を次回のデフォルトとして保存"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>この配置をデフォルトに保存</button>
       </div>
       <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
         <div style="font-size:10px;color:#7a7060;margin-bottom:6px;">送付メモ（内部用・PDFには出ません）</div>
@@ -1708,10 +1709,10 @@
     <div style="margin-bottom:12px;">
       <div style="font-size:11px;color:#7a7060;margin-bottom:6px;">連絡種別</div>
       <select id="contact-type" style="width:100%;background:#050505;border:1px solid rgba(200,168,75,0.2);color:#e8e0d0;padding:8px 12px;border-radius:4px;font-size:13px;font-family:inherit;">
-        <option value="call">📞 電話</option>
-        <option value="email">📧 メール</option>
-        <option value="visit">🤝 訪問</option>
-        <option value="other">📝 その他</option>
+        <option value="call">電話</option>
+        <option value="email">メール</option>
+        <option value="visit">訪問</option>
+        <option value="other">その他</option>
       </select>
     </div>
     <div style="margin-bottom:12px;">
@@ -1794,8 +1795,8 @@
           <div id="detail-industry-wrap" style="margin-top:4px;"></div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-outline btn-sm" onclick="openEditFromDetail()" data-tip="編集">✏️ 編集</button>
-          <button onclick="closeDetailModal()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
+          <button class="btn btn-outline btn-sm" onclick="openEditFromDetail()" data-tip="編集"><svg class="ic" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>編集</button>
+          <button onclick="closeDetailModal()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:0 4px;"><svg class="ic-only" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
       </div>
 
@@ -1874,7 +1875,7 @@
           <div style="flex:1;">
             <div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;">名刺</div>
             <input type="file" id="meishi-file" accept="image/*" capture="environment" style="display:none;" onchange="uploadMeishi(this)">
-            <button class="btn btn-outline btn-sm" onclick="document.getElementById('meishi-file').click()">📷 名刺を追加</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('meishi-file').click()"><svg class="ic" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>名刺を追加</button>
             <div id="detail-meishi" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;min-height:40px;">
               <span class="meishi-empty" style="font-size:12px;color:var(--text3);">名刺未登録</span>
             </div>
@@ -1883,7 +1884,7 @@
         <div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;">添付ファイル</div>
         <div id="detail-files" style="font-size:13px;color:var(--text2);margin-bottom:12px;"></div>
         <label style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--text2);">
-          📎 ファイルを添付
+          <svg class="ic" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>ファイルを添付
           <input type="file" id="detail-file-input" style="display:none;" onchange="uploadCustomerFile(this)">
         </label>
       </div>
@@ -1892,7 +1893,7 @@
 
     <!-- フッター -->
     <div style="padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg2);">
-      <button class="btn btn-ghost btn-sm" onclick="deleteFromDetail()" style="color:#f87171;">🗑 削除</button>
+      <button class="btn btn-ghost btn-sm" onclick="deleteFromDetail()" style="color:#f87171;"><svg class="ic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>削除</button>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-outline btn-sm" onclick="openDocFromDetail('estimate')">見積書を作成</button>
         <button class="btn btn-primary btn-sm" onclick="openEditFromDetail()">編集</button>
@@ -2071,8 +2072,28 @@ const INDUSTRIES = {
   food:         { label:'飲食店',           icon:'◈', cls:'ind-food',         fields:[{key:'コースメニュー',placeholder:'例: 忘年会コース'},{key:'予約日時',placeholder:'例: 2026-04-10'},{key:'人数',placeholder:'例: 8名'},{key:'アレルギー',placeholder:'例: えびNG'}] },
   realestate:   { label:'不動産',           icon:'◈', cls:'ind-realestate',   fields:[{key:'物件名',placeholder:'例: サンハイツ'},{key:'物件住所',placeholder:'例: 名古屋市'},{key:'契約種別',placeholder:'例: 売買'},{key:'希望条件',placeholder:'例: 3LDK'}] },
   medical:      { label:'医療整骨院',       icon:'◈', cls:'ind-medical',      fields:[{key:'施術内容',placeholder:'例: 腰部施術'},{key:'次回来院日',placeholder:'例: 2026-04-08'},{key:'保険種別',placeholder:'例: 健康保険'},{key:'症状特記',placeholder:'例: 腰痛'}] },
-  other:        { label:'その他',           icon:'📋', cls:'ind-other',        fields:[] },
+  other:        { label:'その他',           icon:'◈', cls:'ind-other',        fields:[] },
 };
+
+// ---- Lucide icon helpers (絵文字置き換え 2026-06-07) ----
+const LIC = {
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>',
+  clipboard:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  receipt:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  bot:'<path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
+  message:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  checkcircle:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  arrowleft:'<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  refresh:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  sparkles:'<path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/>',
+  bell:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  warning:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  rotateccw:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>'
+};
+function licSvg(name, cls){ return '<svg class="'+(cls||'ic')+'" viewBox="0 0 24 24">'+(LIC[name]||'')+'</svg>'; }
 
 const STEPS_ADD   = ['name','company','tel','email','address','memo'];
 const STEPS_LABEL = ['顧客名（必須）','会社名','電話番号','メールアドレス','住所','メモ・備考'];
@@ -3674,7 +3695,7 @@ async function showDocVersions(docId) {
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:24px;max-width:500px;width:100%;max-height:70vh;overflow-y:auto;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <div style="font-size:13px;color:var(--text);font-weight:600;letter-spacing:1px;">版履歴</div>
-          <button onclick="this.closest('div[style*=fixed]').remove()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:18px;">✕</button>
+          <button onclick="this.closest('div[style*=fixed]').remove()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:18px;"><svg class="ic-only" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         ${versions.map(v => `
           <div style="padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;">
@@ -3746,7 +3767,8 @@ function addMsg(role, html, buttons) {
     buttons.forEach(b => {
       const btn = document.createElement('button');
       btn.className = 'wbtn ' + (b.cls||'');
-      btn.textContent = b.label;
+      if (b.icon) btn.innerHTML = b.icon;
+      btn.appendChild(document.createTextNode(b.label));
       if (b.tip) btn.setAttribute('data-tip', b.tip);
       btn.onclick = e => { e.preventDefault(); document.getElementById('ai-input').value=''; b.action(); };
       bd.appendChild(btn);
@@ -3776,7 +3798,7 @@ function startChat() {
     { label:'見積書の作り方',     action:()=>{ addMsg('user','見積書の作り方'); addMsg('ai','「見積書を作成」を押して顧客を選択。\n書類番号・日付・明細（品目/数量/単価）・備考を順に入力します。\n確認後PDFが自動生成されます。'); } },
     { label:'請求書の作り方',     action:()=>{ addMsg('user','請求書の作り方'); addMsg('ai','「請求書」タブを選択して顧客・明細を入力します。\n支払期限・振込先がデフォルトでONになります。\n見積書から「請求書化」ボタンでも作成できます。'); } },
     { label:'データが消えないか', action:()=>{ addMsg('user','データが消えないか'); addMsg('ai','データはサーバー（SQLite）に安全に保存されています。\n定期的に設定画面の「バックアップを作成」でJSONを保存してください。'); } },
-    { label:'🤖 AIチャットで相談する', action:()=>showChatModelSelect() },
+    { icon:licSvg('bot','ic-sm'), label:'AIチャットで相談する', action:()=>showChatModelSelect() },
     { label:'メニューへ', action:()=>showWelcome() },
   ]);
 }
@@ -3976,12 +3998,12 @@ function showWelcome() {
   const c = document.getElementById('ai-messages');
   c.innerHTML = '';
   addMsg('ai', '何をしますか？', [
-    { label:'👤 顧客を登録',   cls:'wbtn-confirm', action: () => startAdd(),        tip:'名前・業種・連絡先などを\n順番に入力して登録します' },
-    { label:'📄 見積書を作成', action: () => startDoc('estimate'),
+    { icon:licSvg('user','ic-sm'), label:'顧客を登録',   cls:'wbtn-confirm', action: () => startAdd(),        tip:'名前・業種・連絡先などを\n順番に入力して登録します' },
+    { icon:licSvg('file','ic-sm'), label:'見積書を作成', action: () => startDoc('estimate'),
       tip:'顧客を選んで明細を入力。\nPDFが自動生成されます' },
-    { label:'📋 請求書を作成', action: () => startDoc('invoice'),                  tip:'顧客を選んで明細を入力。\nPDFが自動生成されます' },
-    { label:'🧾 領収書を作成', action: () => startDoc('receipt'),                   tip:'支払い済みの領収書を\n作成してPDF出力します' },
-    { label:'⚙️ 編集・削除',  cls:'wbtn-skip',    action: () => showSubMenu(),     tip:'登録済み顧客の情報を\n編集または削除します' },
+    { icon:licSvg('clipboard','ic-sm'), label:'請求書を作成', action: () => startDoc('invoice'),                  tip:'顧客を選んで明細を入力。\nPDFが自動生成されます' },
+    { icon:licSvg('receipt','ic-sm'), label:'領収書を作成', action: () => startDoc('receipt'),                   tip:'支払い済みの領収書を\n作成してPDF出力します' },
+    { icon:licSvg('settings','ic-sm'), label:'編集・削除',  cls:'wbtn-skip',    action: () => showSubMenu(),     tip:'登録済み顧客の情報を\n編集または削除します' },
   ]);
 }
 
@@ -4342,7 +4364,7 @@ function handleDocItemInput(val) {
     wizard.data.items[idx].price = parseFloat(val.replace(/,/g,'')) || 0;
     wizard.data._docPhase = null;
     const subtotal = wizard.data.items[idx].qty * wizard.data.items[idx].price;
-    addMsg('ai', '✓ '+wizard.data.items[idx].name+' × '+wizard.data.items[idx].qty+' = ¥'+subtotal.toLocaleString(), [
+    addMsg('ai', licSvg('check','ic-sm')+wizard.data.items[idx].name+' × '+wizard.data.items[idx].qty+' = ¥'+subtotal.toLocaleString(), [
       { label:'続けて品目を追加', action:()=>askDocItems() },
       { label:'これで完了',       cls:'wbtn-confirm', action:()=>askDocNotes() },
     ]);
@@ -4501,7 +4523,7 @@ function handleGoBack() {
   if (!wizard.mode) { showWelcome(); return; }
   if (!wizard.history || wizard.history.length <= 1) {
     // 最初のステップならメニューへ
-    addMsg('user','← メニューへ');
+    addMsg('user',licSvg('arrowleft','ic-sm')+'メニューへ');
     showWelcome(); return;
   }
   // 1つ前の状態に戻す（現在 + 直前 を除いた最後）
@@ -4527,6 +4549,35 @@ function downloadSample() {
   a.download = 'nexutha_crm_sample.csv';
   a.click();
 }
+
+// CSVの1行を配列に分解（"で囲まれたカンマ・""エスケープに対応）
+function parseCSVLine(line) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (q) {
+      if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else { q = false; } }
+      else { cur += ch; }
+    } else {
+      if (ch === '"') { q = true; }
+      else if (ch === ',') { out.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+  }
+  out.push(cur);
+  return out.map(c => c.replace(/\r$/, '').trim());
+}
+
+// ヘッダー名の表記ゆれ（日本語・英語）→ 内部フィールドの対応表
+const CSV_HEADER_ALIASES = {
+  name:    ['name', '顧客名', '氏名', '名前', 'お名前'],
+  company: ['company', '会社名', '会社', '法人名'],
+  tel:     ['tel', 'phone', '電話番号', '電話', 'tel番号'],
+  email:   ['email', 'e-mail', 'mail', 'メールアドレス', 'メール'],
+  address: ['address', '住所'],
+  memo:    ['memo', 'note', 'notes', 'メモ', '備考'],
+};
+const CSV_DEFAULT_ORDER = ['name', 'company', 'tel', 'email', 'address', 'memo'];
 
 async function importCSV() {
   try {
@@ -4560,17 +4611,33 @@ async function importCSV() {
   });
   const lines = text.split('\n').filter(l => l.trim());
   if (lines.length < 2) { showToast('データが見つかりません'); return; }
+
+  // 1行目をヘッダーとして解釈し、各列の位置を特定（日本語・英語どちらのヘッダーにも対応）
+  const headerCells = parseCSVLine(lines[0]).map(h => h.toLowerCase());
+  const colMap = {};
+  headerCells.forEach((h, idx) => {
+    for (const field in CSV_HEADER_ALIASES) {
+      if (colMap[field] === undefined && CSV_HEADER_ALIASES[field].some(a => a.toLowerCase() === h)) {
+        colMap[field] = idx; break;
+      }
+    }
+  });
+  // ヘッダーが1つも認識できなければ、従来どおり列順（name,company,tel,email,address,memo）で読む（後方互換）
+  if (Object.keys(colMap).length === 0) { CSV_DEFAULT_ORDER.forEach((f, i) => { colMap[f] = i; }); }
+  const cell = (cols, field) => colMap[field] !== undefined ? (cols[colMap[field]] || '') : '';
+
   let count = 0;
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g,''));
-    if (!cols[0]) continue;
+    const cols = parseCSVLine(lines[i]);
+    const name = cell(cols, 'name');
+    if (!name) continue;
     await NAPI.createCustomer({
-      name:       cols[0] || '',
-      company:    cols[1] || '',
-      tel:        cols[2] || '',
-      email:      cols[3] || '',
-      address:    cols[4] || '',
-      memo:       cols[5] || '',
+      name:       name,
+      company:    cell(cols, 'company'),
+      tel:        cell(cols, 'tel'),
+      email:      cell(cols, 'email'),
+      address:    cell(cols, 'address'),
+      memo:       cell(cols, 'memo'),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
@@ -4588,7 +4655,8 @@ async function exportCSV() {
   const list = await NAPI.getCustomers();
   if (!list.length) { showToast('顧客データがありません'); return; }
   const headers = ['顧客名','会社名','電話番号','メールアドレス','住所','メモ'];
-  const rows = list.map(c => [c.name,c.company,c.tel,c.email,c.address,c.memo].map(v=>(v||'').includes(',')?'"'+v+'"':v||'').join(','));
+  const esc = v => { v = (v == null ? '' : String(v)); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const rows = list.map(c => [c.name,c.company,c.tel,c.email,c.address,c.memo].map(esc).join(','));
   const csv = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
@@ -4735,7 +4803,7 @@ async function deleteFile(fileId) {
 // ================================================================
 // Toast notification
 // ================================================================
-function showToast(msg, duration=3000) {
+function showToast(msg, duration=3000, icon=null) {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -4744,8 +4812,9 @@ function showToast(msg, duration=3000) {
     document.body.appendChild(container);
   }
   const toast = document.createElement('div');
-  toast.style.cssText = 'background:var(--bg2);border:1px solid var(--gold);border-radius:2px;padding:10px 20px;color:var(--gold);font-family:"Josefin Sans",sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
-  toast.textContent = msg;
+  toast.style.cssText = 'background:var(--bg2);border:1px solid var(--gold);border-radius:2px;padding:10px 20px;color:var(--gold);font-family:"Josefin Sans",sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;gap:6px;justify-content:center;';
+  if (icon) { var _ic=document.createElement('span'); _ic.style.cssText='display:inline-flex;align-items:center;'; _ic.innerHTML=icon; toast.appendChild(_ic); }
+  var _tx=document.createElement('span'); _tx.textContent=msg; toast.appendChild(_tx);
   container.appendChild(toast);
   setTimeout(() => toast.remove(), duration);
 }
@@ -4848,7 +4917,7 @@ async function exportBackup(encrypt = false) {
     a.click();
     URL.revokeObjectURL(url);
     const kb = (blob.size/1024).toFixed(1);
-    if (status) status.textContent = '✓ バックアップ完了 (' + kb + ' KB)';
+    if (status) status.innerHTML = licSvg('check','ic-sm') + 'バックアップ完了 (' + kb + ' KB)';
     showToast('バックアップを保存しました');
   } catch(e) {
     if (status) status.textContent = 'エラー: ' + e.message;
@@ -4891,8 +4960,8 @@ async function importBackup(input) {
       }
       const result = await res.json();
       input.value = '';
-      const msg = `✓ リストア完了: 顧客${result.customers}件・書類${result.documents}件`;
-      if (status) status.textContent = msg;
+      const msg = `リストア完了: 顧客${result.customers}件・書類${result.documents}件`;
+      if (status) status.innerHTML = licSvg('check','ic-sm') + msg;
       showToast('リストア完了しました');
       await loadCustomers();
       await loadDocuments();
@@ -5089,21 +5158,21 @@ function checkDeadlineNotifications() {
     if (d.payment_due && d.status !== 'paid' && d.status !== 'cancelled') {
       if (d.payment_due < today) {
         const c = window.APP.customers.find(c => c.id === d.customer_id);
-        alerts.push(`⚠️ 支払期限超過: ${c?c.name:''} ${d.doc_number} (${d.payment_due})`);
+        alerts.push({icon:licSvg('warning','ic-sm'), text:`支払期限超過: ${c?c.name:''} ${d.doc_number} (${d.payment_due})`});
       } else if (d.payment_due <= soonStr) {
         const c = window.APP.customers.find(c => c.id === d.customer_id);
-        alerts.push(`🔔 支払期限まで3日以内: ${c?c.name:''} ${d.doc_number} (${d.payment_due})`);
+        alerts.push({icon:licSvg('bell','ic-sm'), text:`支払期限まで3日以内: ${c?c.name:''} ${d.doc_number} (${d.payment_due})`});
       }
     }
     if (d.validity && d.type === 'estimate' && d.status !== 'cancelled') {
       if (d.validity < today) {
         const c = window.APP.customers.find(c => c.id === d.customer_id);
-        alerts.push(`📋 有効期限切れ: ${c?c.name:''} ${d.doc_number} (${d.validity})`);
+        alerts.push({icon:licSvg('clipboard','ic-sm'), text:`有効期限切れ: ${c?c.name:''} ${d.doc_number} (${d.validity})`});
       }
     }
   });
   if (alerts.length > 0) {
-    alerts.slice(0,3).forEach(msg => showToast(msg, 5000));
+    alerts.slice(0,3).forEach(a => showToast(a.text, 5000, a.icon));
   }
 }
 
@@ -6086,7 +6155,7 @@ const VERSION_URL = `${API_BASE}/version`;
 async function checkUpdate() {
   const dispEl = document.getElementById('current-version-text');
   if (dispEl) dispEl.textContent = 'v' + CURRENT_VERSION;
-  showToast('🔄 最新バージョンを確認中...');
+  showToast('最新バージョンを確認中...', 3000, licSvg('refresh','ic-only'));
   try {
     const res = await fetch(VERSION_URL + '?t=' + Date.now());
     if (!res.ok) { showToast('確認に失敗しました'); return null; }
@@ -6096,9 +6165,9 @@ async function checkUpdate() {
       const bannerText = document.getElementById('update-banner-text');
       if (banner) banner.style.display = 'flex';
       if (bannerText) bannerText.textContent = 'v' + data.version + ' が利用可能です';
-      showToast('🎉 v' + data.version + ' にアップデートできます！');
+      showToast('v' + data.version + ' にアップデートできます！', 3000, licSvg('sparkles','ic-only'));
     } else {
-      showToast('✅ 最新バージョンです（v' + CURRENT_VERSION + '）');
+      showToast('最新バージョンです（v' + CURRENT_VERSION + '）', 3000, licSvg('checkcircle','ic-only'));
     }
     return data;
   } catch(e) {
@@ -6139,7 +6208,7 @@ async function backgroundUpdateCheck() {
     if (compareVersions(data.version, CURRENT_VERSION) > 0) {
       const badge = document.getElementById('nav-updates-badge');
       if (badge) badge.style.display = 'block';
-      showToast('🔔 新しいバージョン v' + data.version + ' があります！「お知らせ」から更新できます');
+      showToast('新しいバージョン v' + data.version + ' があります！「お知らせ」から更新できます', 3000, licSvg('bell','ic-only'));
     }
   } catch(e) {}
 }
@@ -6653,7 +6722,7 @@ async function deleteDayEvent(eventId) {
 
 <div id="page-day" style="display:none;position:fixed;top:0;left:220px;right:0;bottom:0;background:var(--bg);z-index:110;overflow-y:auto;padding:32px 36px;">
   <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
-    <button onclick="closeDayPage()" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;">← カレンダーに戻る</button>
+    <button onclick="closeDayPage()" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;"><svg class="ic" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>カレンダーに戻る</button>
     <div id="day-page-title" style="font-size:24px;font-weight:700;letter-spacing:3px;color:var(--gold);"></div>
     <div style="display:flex;gap:6px;margin-left:auto;">
       <span style="font-size:11px;color:var(--text3);align-self:center;">日の色：</span>
@@ -6662,7 +6731,7 @@ async function deleteDayEvent(eventId) {
       <span onclick="setDayColor('#27ae60')" style="width:24px;height:24px;border-radius:50%;background:#27ae60;cursor:pointer;border:2px solid transparent;" data-day-color="#27ae60"></span>
       <span onclick="setDayColor('#4A90D9')" style="width:24px;height:24px;border-radius:50%;background:#4A90D9;cursor:pointer;border:2px solid transparent;" data-day-color="#4A90D9"></span>
       <span onclick="setDayColor('#8e44ad')" style="width:24px;height:24px;border-radius:50%;background:#8e44ad;cursor:pointer;border:2px solid transparent;" data-day-color="#8e44ad"></span>
-      <span onclick="setDayColor('')" style="width:24px;height:24px;border-radius:50%;background:var(--bg3);cursor:pointer;border:2px solid var(--border);font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--text3);">✕</span>
+      <span onclick="setDayColor('')" style="width:24px;height:24px;border-radius:50%;background:var(--bg3);cursor:pointer;border:2px solid var(--border);font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg class="ic-only" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
     </div>
   </div>
 
@@ -6697,7 +6766,7 @@ async function deleteDayEvent(eventId) {
   <div style="background:var(--bg2);border-radius:12px;padding:24px;width:480px;max-width:90%;max-height:70vh;display:flex;flex-direction:column;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <div style="font-size:13px;font-weight:600;color:var(--text);">顧客を選択</div>
-      <button onclick="closeDayCustomerSelect()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;">✕</button>
+      <button onclick="closeDayCustomerSelect()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;"><svg class="ic-only" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <input type="text" id="day-customer-search" placeholder="顧客名で検索..." oninput="filterDayCustomers(this.value)"
       style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;box-sizing:border-box;margin-bottom:12px;">

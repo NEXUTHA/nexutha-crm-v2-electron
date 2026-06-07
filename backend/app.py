@@ -1282,7 +1282,9 @@ init_db()
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3456, reload=False)
+    # 配布版（PyInstallerでfrozen）は9876、開発版は3456でポートを完全分離
+    _PORT = 9876 if getattr(_sys, "frozen", False) else 3456
+    uvicorn.run(app, host="0.0.0.0", port=_PORT, reload=False)
 
 
 # ================================================================

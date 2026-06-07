@@ -138,7 +138,7 @@
     <div class="brand-client" id="sidebar-client" data-tip="データはサーバーに保存されています。&#10;Docker経由で動作しています。" style="cursor:help;color:var(--gold);opacity:0.8;">オンライン動作中</div>
   </div>
   <div class="nav-section">
-    <div style="background:#e74c3c;color:#fff;font-size:10px;padding:4px 8px;border-radius:4px;margin-bottom:8px;text-align:center;font-weight:700;">⚠️ 開発版 DEV</div>
+    <div id="dev-banner" style="display:none;background:#e74c3c;color:#fff;font-size:10px;padding:4px 8px;border-radius:4px;margin-bottom:8px;text-align:center;font-weight:700;">⚠️ 開発版 DEV</div>
     <div class="nav-label">MENU</div>
     <div class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard" data-tip="売上・顧客数などの統計を確認">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -6076,7 +6076,8 @@ async function _hash(str) {
 }
 
 async function verifyLicenseKey(key) {
-  if (key === 'NXTH-0001-3C6B-BF0B') return true;
+  // 開発用キーのスキップは開発版(npm start)のみ有効。配布版では無効化（収益・セキュリティ保護）
+  if (window.electronAPI && window.electronAPI.isDev && key === 'NXTH-0001-3C6B-BF0B') return true;
   if (!key || key.length < 10) return false;
   try {
     const res = await fetch('https://gvaoljanjtgotzjzcfta.supabase.co/functions/v1/verify-license', {
@@ -6149,7 +6150,7 @@ async function submitLicense() {
 // ================================================================
 // アップデート・お知らせ機能
 // ================================================================
-const CURRENT_VERSION = "2.3.3";
+const CURRENT_VERSION = "2.4.0";
 const VERSION_URL = `${API_BASE}/version`;
 
 async function checkUpdate() {
@@ -6278,6 +6279,8 @@ async function _dbGetDocuments() {
 }
 
 window.addEventListener('load', async () => {
+  // 開発版(npm start)のみDEVバナーを表示。配布版では非表示のまま
+  try { if (window.electronAPI && window.electronAPI.isDev) { const _db = document.getElementById('dev-banner'); if (_db) _db.style.display = 'block'; } } catch(e) {}
   // OSのダークモード設定を検知してデフォルトテーマを設定
   try {
     if (!localStorage.getItem('nexutha-theme') && !localStorage.getItem('nexutha_ui_style')) {

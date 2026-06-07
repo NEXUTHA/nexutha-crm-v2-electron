@@ -6,7 +6,8 @@ const http = require('http');
 
 let mainWindow;
 let pythonProcess;
-const PORT = 3456;
+// 配布版（パッケージ済み）は9876、開発版は3456でポートを完全分離
+const PORT = app.isPackaged ? 9876 : 3456;
 
 function startPythonServer() {
   const isDev = !app.isPackaged;
@@ -62,10 +63,11 @@ function createWindow() {
     height: 900,
     minWidth: 800,
     minHeight: 600,
-    title: 'NEXUTHA CRM DEV',
+    title: app.isPackaged ? 'NEXUTHA CRM' : 'NEXUTHA CRM DEV',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
+      additionalArguments: [`--nexutha-isdev=${!app.isPackaged}`],
     },
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 16 },

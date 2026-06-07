@@ -1,0 +1,182 @@
+name: Release
+
+# vX.X.X 形式のタグを push したら起動する。
+# 例:  git tag v2.4.5 && git push origin v2.4.5
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+# gh release create がリリースを作るために contents:write が必要。
+permissions:
+  contents: write
+
+# 同じタグで二重起動しないようにする。
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # macos-14 = Apple Silicon (arm64) ランナー。arm64専用ビルドに必須。
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      # 1) ソースコードを取得
+      - name: コードを取得
+        uses: actions/checkout@v4
+
+      # 2) タグと package.json のバージョンが一致しているか確認（不一致なら即停止）
+      #    過去に「タグはv2.4.5なのに中身は2.4.4」という事故を防ぐためのガード。
+      - name: バージョン整合性チェック
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          echo "タグのバージョン      : $TAG"
+          echo "package.jsonのバージョン: $PKG"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::タグ(v$TAG)とpackage.json($PKG)のバージョンが一致しません。package.jsonを上げてからタグを打ち直してください。"
+            exit 1
+          fi
+          echo "VERSION=$PKG" >> "$GITHUB_ENV"
+
+      # 3) Node.js をセットアップ
+      - name: Node.js をセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 4) Python 3.10 をセットアップ（backend のビルドに使用）
+      - name: Python 3.10 をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 5) Python 依存 + PyInstaller を導入
+      - name: Python依存とPyInstallerを導入
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pyinstaller
+
+      # 6) backend を PyInstaller で単一実行ファイルにビルド → dist/backend が生成される
+      - name: backendをビルド (PyInstaller)
+        run: |
+          python -m PyInstaller backend.spec --noconfirm --distpath dist --workpath build
+          echo "----- dist/backend を確認 -----"
+          file dist/backend
+
+      # 7) Node 依存を導入（package-lock.json に厳密一致）
+      - name: Node依存を導入
+        run: npm ci
+
+      # 8) 署名付きビルド + .app の公証
+      #    npm run build:mac = check-before-build.sh（DB混入ガード）→ electron-builder --mac
+      #    末尾に --publish never を付け、electron-builderの自動公開を禁止する。
+      #    （自動公開させると staple前の古いハッシュを持つ latest-mac.yml が公開され事故るため）
+      #    署名: CSC_LINK(=.p12のbase64) と CSC_KEY_PASSWORD を electron-builder が使う。
+      #    公証: afterSign(scripts/notarize.js)が APPLE_ID/APP用パスワード/TEAM_ID で .app を公証。
+      - name: 署名付きビルドと.appの公証 (electron-builder)
+        env:
+          CSC_LINK: ${{ secrets.MAC_CERTS }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: npm run build:mac -- --publish never
+
+      # 9) 生成物をドット形式のファイル名にリネーム（yml/アセット/実ファイルの完全一致のため）
+      #    electron-builder は "NEXUTHA CRM-x.x.x-arm64.dmg"（スペース）で出力するので
+      #    "NEXUTHA.CRM-x.x.x-arm64.dmg"（ドット）に統一する。
+      - name: ファイル名をドット形式に統一
+        run: |
+          cd dist
+          DMG_SRC="$(ls *.dmg | head -1)"
+          ZIP_SRC="$(ls *-mac.zip | head -1)"
+          echo "dmg: $DMG_SRC -> NEXUTHA.CRM-${VERSION}-arm64.dmg"
+          echo "zip: $ZIP_SRC -> NEXUTHA.CRM-${VERSION}-arm64-mac.zip"
+          mv "$DMG_SRC" "NEXUTHA.CRM-${VERSION}-arm64.dmg"
+          mv "$ZIP_SRC" "NEXUTHA.CRM-${VERSION}-arm64-mac.zip"
+
+      # 10) dmg を公証（.app とは別に dmg 自体の公証が staple に必要）
+      - name: dmgを公証
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          DMG="dist/NEXUTHA.CRM-${VERSION}-arm64.dmg"
+          xcrun notarytool submit "$DMG" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
+      # 11) dmg を staple（公証チケットを dmg に埋め込む）→ ★この後 dmg のバイトが変わる★
+      - name: dmgをstaple
+        run: |
+          DMG="dist/NEXUTHA.CRM-${VERSION}-arm64.dmg"
+          xcrun stapler staple "$DMG"
+          xcrun stapler validate "$DMG"
+
+      # 12) ★最重要★ staple後のファイルから sha512/size を計算し latest-mac.yml をゼロから生成。
+      #     electron-builder が出すymlは staple前の古いハッシュなので絶対に使わない。
+      #     順序: (staple済み) → ハッシュ計算 → yml生成 を厳守。
+      #     url はドット形式の実ファイル名と完全一致させる。
+      - name: latest-mac.ymlを生成 (staple後のハッシュ)
+        run: |
+          DMG="dist/NEXUTHA.CRM-${VERSION}-arm64.dmg"
+          ZIP="dist/NEXUTHA.CRM-${VERSION}-arm64-mac.zip"
+          DMG_SHA="$(openssl dgst -sha512 -binary "$DMG" | openssl base64 -A)"
+          DMG_SIZE="$(stat -f%z "$DMG")"
+          ZIP_SHA="$(openssl dgst -sha512 -binary "$ZIP" | openssl base64 -A)"
+          ZIP_SIZE="$(stat -f%z "$ZIP")"
+          RELEASE_DATE="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          cat > dist/latest-mac.yml <<EOF
+          version: ${VERSION}
+          files:
+            - url: NEXUTHA.CRM-${VERSION}-arm64-mac.zip
+              sha512: ${ZIP_SHA}
+              size: ${ZIP_SIZE}
+            - url: NEXUTHA.CRM-${VERSION}-arm64.dmg
+              sha512: ${DMG_SHA}
+              size: ${DMG_SIZE}
+          path: NEXUTHA.CRM-${VERSION}-arm64-mac.zip
+          sha512: ${ZIP_SHA}
+          releaseDate: '${RELEASE_DATE}'
+          EOF
+          echo "----- 生成された latest-mac.yml -----"
+          cat dist/latest-mac.yml
+
+      # 13) 念のための最終検証: ymlのurlと実ファイル・サイズが完全一致するか確認
+      - name: latest-mac.ymlの整合性を最終検証
+        run: |
+          DMG="dist/NEXUTHA.CRM-${VERSION}-arm64.dmg"
+          ZIP="dist/NEXUTHA.CRM-${VERSION}-arm64-mac.zip"
+          test -f "$DMG" || { echo "::error::dmgが存在しない"; exit 1; }
+          test -f "$ZIP" || { echo "::error::zipが存在しない"; exit 1; }
+          grep -q "NEXUTHA.CRM-${VERSION}-arm64.dmg" dist/latest-mac.yml || { echo "::error::yml内のdmg urlが不一致"; exit 1; }
+          grep -q "NEXUTHA.CRM-${VERSION}-arm64-mac.zip" dist/latest-mac.yml || { echo "::error::yml内のzip urlが不一致"; exit 1; }
+          # ymlに書いたsizeと実ファイルsizeが一致するか
+          DMG_SIZE="$(stat -f%z "$DMG")"
+          grep -q "size: ${DMG_SIZE}" dist/latest-mac.yml || { echo "::error::dmgのsizeがymlと不一致"; exit 1; }
+          echo "✅ 整合性OK"
+
+      # 14) GitHubリリースを作成して dmg / zip / latest-mac.yml を添付
+      #     （タグはpush済みなのでそのタグにリリースをぶら下げる）
+      - name: GitHubリリースを作成
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DMG="dist/NEXUTHA.CRM-${VERSION}-arm64.dmg"
+          ZIP="dist/NEXUTHA.CRM-${VERSION}-arm64-mac.zip"
+          YML="dist/latest-mac.yml"
+          NOTES="$(node -p "require('./version.json').notes || ''" 2>/dev/null || echo '')"
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes "NEXUTHA CRM v${VERSION}
+
+          ${NOTES}" \
+            "$DMG" "$ZIP" "$YML"
+          echo "✅ リリース v${VERSION} を公開しました"

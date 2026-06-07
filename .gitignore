@@ -7,5 +7,4 @@ dist/
 backend/__pycache__/
 backend/data/
 backend/.venv/
-backend.spec
 node_modules/

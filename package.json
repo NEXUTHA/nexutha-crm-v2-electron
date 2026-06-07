@@ -1,6 +1,6 @@
 {
   "name": "nexutha-crm-dev",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "NEXUTHA CRM - 完全ローカル型顧客管理システム",
   "main": "main.js",
   "author": "Yamashita Yasuhide / NEXUTHA",
@@ -29,8 +29,13 @@
         {
           "target": "dmg",
           "arch": [
-            "arm64",
-            "x64"
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
           ]
         }
       ],

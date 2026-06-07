@@ -24,7 +24,7 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <link rel="manifest" href="manifest.json">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://cdnjs.cloudflare.com http://localhost:3456 http://localhost:9876 https://gvaoljanjtgotzjzcfta.supabase.co https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://huggingface.co/mlc-ai/ blob:; font-src 'self' https://fonts.gstatic.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://api.github.com https://cdnjs.cloudflare.com http://localhost:3456 http://localhost:9876 https://gvaoljanjtgotzjzcfta.supabase.co https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://huggingface.co/mlc-ai/ blob:; font-src 'self' https://fonts.gstatic.com;">
   <meta name="viewport"  content="width=device-width, initial-scale=1.0">
 <title>NEXUTHA CRM</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
@@ -6178,15 +6178,17 @@ async function checkUpdate() {
   if (dispEl) dispEl.textContent = 'v' + CURRENT_VERSION;
   showToast('最新バージョンを確認中...', 3000, licSvg('refresh','ic-only'));
   try {
-    const res = await fetch(VERSION_URL + '?t=' + Date.now());
+    const res = await fetch('https://api.github.com/repos/NEXUTHA/nexutha-crm-v2-electron/releases/latest', { headers: { 'Accept': 'application/vnd.github+json' } });
     if (!res.ok) { showToast('確認に失敗しました'); return null; }
-    const data = await res.json();
-    if (compareVersions(data.version, CURRENT_VERSION) > 0) {
+    const gh = await res.json();
+    const latest = (gh.tag_name || '').replace(/^v/, '');
+    const data = { version: latest };
+    if (latest && compareVersions(latest, CURRENT_VERSION) > 0) {
       const banner = document.getElementById('update-banner');
       const bannerText = document.getElementById('update-banner-text');
       if (banner) banner.style.display = 'flex';
-      if (bannerText) bannerText.textContent = 'v' + data.version + ' が利用可能です';
-      showToast('v' + data.version + ' にアップデートできます！', 3000, licSvg('sparkles','ic-only'));
+      if (bannerText) bannerText.textContent = 'v' + latest + ' が利用可能です';
+      showToast('v' + latest + ' にアップデートできます！', 3000, licSvg('sparkles','ic-only'));
     } else {
       showToast('最新バージョンです（v' + CURRENT_VERSION + '）', 3000, licSvg('checkcircle','ic-only'));
     }

@@ -689,3 +689,38 @@ Secretの登録は `gh secret set <名前>` で行う（リポジトリ: NEXUTHA
   確実に届けるため、版変更時の clearCache は必須（今回 main.js に恒久実装済み）。
 - 配布版の画面検証は Playwright connectOverCDP（アプリを --remote-debugging-port=9222 で起動）で
   実DOM/表示を読み取り＋スクショ。curlやソース確認だけでは「キャッシュ由来の古い画面」を見逃す。
+
+---
+
+## 2026-06-08 インストール場所の自動修復で「何もせず自動更新が届く」を実装・実証（v2.5.0）
+
+### 目的
+新規購入者がブラウザでdmgをDL→/Applicationsに入れると com.apple.quarantine が付き、
+App Translocation で読み取り専用パス実行となり自動更新の適用が不可能になる。これを
+ユーザー操作なしで自動修復し、以降の自動更新が確実に届くようにする。
+
+### 実装（main.js / 起動時・ウィンドウ生成前に handleInstallLocation() を実行）
+- A. translocation検出時（execPathに/AppTranslocation/）: /Applications本体に対し
+  `xattr -dr com.apple.quarantine` を実行→隔離除去→`app.relaunch({execPath:正規バイナリ})`+`app.exit(0)`で正規パス再起動。
+- B. /Applications外で実行時（!app.isInApplicationsFolder()）: `app.moveToApplicationsFolder()`で移動（成功で自動再起動）。
+- 無限ループ防止: userDataに install-repair-attempted.txt を置き各エピソード1回だけ試行。
+  解消不能なら setupAutoUpdater 側の warnTranslocation() 案内にフォールバック。healed後（非translocation・inApps）はフラグ自動クリア。
+- ★隔離除去とアプリ移動のみ。clearStorageDataは使わずデータ(DB/設定/Cookie/localStorage)は不変。
+
+### 実機 Phase1/Phase2 実証（購入者と同条件・推測なし）
+- Phase1: 2.5.0 dmgをcurl DL→Safari形式のquarantine付与→/Applicationsへ→`open`。
+  ログに `translocation検出→xattr終了コード=0→正規パスから再起動`、再起動後の execPath が
+  `/Applications/...`（/AppTranslocation/なし）、本体のquarantineは除去済み(No such xattr)、
+  起動は2回で収束（ループなし）、フラグはhealed後クリア、顧客DB8件保持 を確認。**ユーザー操作ゼロ**。
+- Phase2: healed 2.5.0 → 2.5.1 を自動更新（検知→DL→今すぐ再起動→quitAndInstall）。
+  ログ `quitAndInstall を実行→version=2.5.1→translocated=false inApplications=true→キャッシュクリア(2.5.0→2.5.1)`、
+  /Applications=2.5.1、お知らせ画面 Playwright実読み取りで currentVersionText=v2.5.1・バナー非表示 を確認。
+
+### Gatekeeper初回ダイアログ（正直な但し書き）
+notarized済みでも、まっさらな新規Macでは初回起動時に「インターネットからDLされたアプリです。開きますか？」
+の標準確認が1回だけ出る（全DLアプリ共通の仕様）。ユーザーが「開く」を1回押せば起動し、その直後に
+本自動修復が走る。"何もしない"の唯一の例外はこの初回1クリックのみで、これは回避対象ではない。
+
+### 検証手法メモ
+配布版の画面検証は、アプリを `--remote-debugging-port=9222` で起動し Playwright の
+connectOverCDP で実DOM読み取り＋スクショ。translocation検証は ps の execPath と electron-log で確認。

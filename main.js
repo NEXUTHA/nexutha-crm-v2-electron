@@ -44,6 +44,91 @@ async function clearHttpCacheOnVersionChange() {
   }
 }
 
+// ================================================================
+// インストール場所の自動修復（新規購入者が何もしなくても自動更新が効くように）
+//   購入者がブラウザでdmgをDL→/Applicationsへ入れると com.apple.quarantine が付き、
+//   App Translocation で読み取り専用パスから実行され、自動更新の適用が不可能になる。
+//   そこで起動時(ウィンドウ生成前)に、ユーザー操作なしで自動修復する:
+//     A. translocation検出時: /Applications の本体から隔離属性を除去し、正規パスで再起動
+//     B. /Applications 外で実行時: 公式API moveToApplicationsFolder() で移動(成功で自動再起動)
+//   無限ループ防止のため userData に試行フラグを置き、各エピソードで修復は1回だけ試みる。
+//   ※ 隔離属性除去とアプリ移動のみ。データ(DB/設定/Cookie/localStorage)には一切触れない。
+//   戻り値: true = 再起動/終了を開始した(以降の起動処理を止める) / false = 通常起動を続行
+// ================================================================
+function handleInstallLocation() {
+  try {
+    if (!app.isPackaged) return false; // 開発版は対象外（誤ってmove等しない）
+    if (process.platform !== 'darwin') return false;
+
+    const flagFile = path.join(app.getPath('userData'), 'install-repair-attempted.txt');
+    const translocated = isTranslocated();
+    let inApps = false;
+    try { inApps = app.isInApplicationsFolder(); } catch (e) { log.warn('isInApplicationsFolder失敗: ' + e); }
+    log.info(`インストール場所チェック: translocated=${translocated} inApplications=${inApps}`);
+
+    // 理想状態（正規/Applications・非translocation）。修復フラグを掃除して通常起動
+    if (!translocated && inApps) {
+      try { if (fs.existsSync(flagFile)) fs.unlinkSync(flagFile); } catch (e) {}
+      return false;
+    }
+
+    const alreadyTried = fs.existsSync(flagFile);
+
+    // --- A. translocation の自動修復 ---
+    if (translocated) {
+      if (alreadyTried) {
+        log.warn('translocation: 自動修復済フラグありだが未解消。ループ防止のため案内に切替');
+        return false; // setupAutoUpdater 側で warnTranslocation() が出る
+      }
+      // 元の/Applications本体パスを execPath のバンドル名から推定
+      const m = process.execPath.match(/\/([^/]+\.app)\//);
+      const bundle = m ? m[1] : (app.getName() + '.app');
+      const original = '/Applications/' + bundle;
+      const originalBin = original + '/Contents/MacOS/' + path.basename(process.execPath);
+      if (!fs.existsSync(originalBin)) {
+        log.warn('translocation: 元アプリが見つからない(' + original + ')。案内に切替');
+        return false;
+      }
+      log.info('translocation検出 → 自動修復: 隔離属性を除去 ' + original);
+      try { fs.writeFileSync(flagFile, 'A'); } catch (e) { log.warn('フラグ書込失敗: ' + e); }
+      const { spawnSync } = require('child_process');
+      const r = spawnSync('/usr/bin/xattr', ['-dr', 'com.apple.quarantine', original]);
+      log.info('xattr -dr com.apple.quarantine 終了コード=' + r.status);
+      if (r.status === 0) {
+        log.info('隔離属性を除去。正規パスから再起動します: ' + originalBin);
+        app.relaunch({ execPath: originalBin });
+        app.exit(0);
+        return true;
+      }
+      log.warn('xattr失敗(status=' + r.status + ')。再起動せず案内に切替');
+      return false;
+    }
+
+    // --- B. /Applications 外で実行 → 公式APIで移動 ---
+    if (!inApps) {
+      if (alreadyTried) {
+        log.warn('move: 既に試行済。ループ防止のため通常起動を続行');
+        return false;
+      }
+      try { fs.writeFileSync(flagFile, 'B'); } catch (e) {}
+      try {
+        log.info('/Applications外で実行中 → moveToApplicationsFolder()');
+        const moved = app.moveToApplicationsFolder();
+        if (moved) { log.info('moveToApplicationsFolder成功(自動で再起動)'); return true; }
+        log.warn('moveToApplicationsFolder: ユーザーがキャンセル。通常起動を続行');
+        return false;
+      } catch (e) {
+        log.error('moveToApplicationsFolder失敗: ' + e);
+        return false;
+      }
+    }
+    return false;
+  } catch (e) {
+    log.error('インストール場所修復で例外: ' + e);
+    return false;
+  }
+}
+
 let mainWindow;
 let pythonProcess;
 // 配布版（パッケージ済み）は9876、開発版は3456でポートを完全分離
@@ -269,6 +354,9 @@ function setupAutoUpdater() {
 }
 
 app.whenReady().then(async () => {
+  // 新規購入者が何もしなくても自動更新が効くよう、インストール場所を自動修復。
+  // translocation解消や/Applicationsへの移動で再起動する場合はここで処理を止める。
+  if (handleInstallLocation()) return;
   // アップデート後に古い画面が出る問題を防ぐため、版が変わっていればHTTPキャッシュをクリア
   await clearHttpCacheOnVersionChange();
   // macOSのコピペメニューを有効化

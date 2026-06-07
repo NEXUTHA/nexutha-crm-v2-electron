@@ -22,12 +22,15 @@ log.info('実行パス(execPath)=' + process.execPath);
 //   同じアプリが二重に起動するとバックエンドが2つ立ち上がり、ポート9876の
 //   奪い合い→片方が起動失敗→古い方が応答 or 接続拒否で白画面、という事故が起きる。
 //   2つ目の起動は即終了し、既存ウィンドウを前面に出す。
+//   ※ 公式パターン: ロックを取得できた時だけ起動処理(whenReady)を登録する。
+//     こうしないと、2つ目のインスタンスでも whenReady 内の reclaimPort() が走り、
+//     1つ目のバックエンドを殺してしまう事故が起きる。
 //   ※ translocation修復(app.relaunch)時は、古いインスタンスがapp.exit(0)で
 //     ロックを解放してから新インスタンスが取得するため競合しない。
 // ================================================================
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
-  log.warn('既に起動済みのため、この2つ目のインスタンスを終了します');
+  log.warn('既に起動済みのため、この2つ目のインスタンスを終了します（起動処理は実行しない）');
   app.quit();
 }
 
@@ -149,6 +152,9 @@ let isQuitting = false;   // アプリ終了中（バックエンドの自動再
 let isUpdating = false;   // 更新適用中（quitAndInstall。バックエンド再起動を抑止）
 let reloadAttempts = 0;   // 本体読み込みの再試行回数（指数バックオフ用）
 let reloadTimer = null;   // 再読み込みの予約タイマー
+let backendRestartAttempts = 0;     // バックエンドの連続再起動回数（暴走防止）
+let backendRestartTimer = null;     // バックエンド再起動の予約タイマー
+const MAX_BACKEND_RESTARTS = 5;     // この回数連続で失敗したら再起動を諦める
 // 配布版（パッケージ済み）は9876、開発版は3456でポートを完全分離
 const PORT = app.isPackaged ? 9876 : 3456;
 
@@ -227,15 +233,37 @@ function startPythonServer() {
   pythonProcess.stdout.on('data', (data) => console.log(`Backend: ${data}`));
   pythonProcess.stderr.on('data', (data) => console.error(`Backend Error: ${data}`));
   pythonProcess.on('error', (err) => { console.error('バックエンドエラー:', err); log.error('バックエンドspawnエラー: ' + err); });
-  // バックエンドが予期せず落ちたら、終了/更新中でない限り自動復旧する（白画面の自己回復）
+  // バックエンドが予期せず落ちたら、終了/更新中でない限り自動復旧する（白画面の自己回復）。
+  // ただし無間隔・無制限に再起動すると暴走するので、指数バックオフ＋連続失敗上限を設ける。
   pythonProcess.on('exit', (code, signal) => {
     log.warn(`バックエンド終了 code=${code} signal=${signal}`);
+    pythonProcess = null;
     if (isQuitting || isUpdating) return;
-    log.info('バックエンドを自動再起動します');
+    scheduleBackendRestart();
+  });
+}
+
+// バックエンドの再起動を指数バックオフで予約する。
+//   ・間隔: 1,2,4,8,15秒(上限)。 ・連続失敗が上限に達したら諦めてエラー画面に切替。
+//   ・健全化に成功したら backendRestartAttempts は 0 にリセット（loadMainApp内）。
+function scheduleBackendRestart() {
+  if (backendRestartTimer || isQuitting || isUpdating) return;
+  if (backendRestartAttempts >= MAX_BACKEND_RESTARTS) {
+    log.error(`バックエンドの再起動に${MAX_BACKEND_RESTARTS}回連続で失敗しました。再起動を停止し、エラー画面に切り替えます`);
+    if (mainWindow && !mainWindow.isDestroyed()) showSplash('error');
+    return;
+  }
+  backendRestartAttempts++;
+  const delay = Math.min(1000 * Math.pow(2, backendRestartAttempts - 1), 15000); // 1,2,4,8,15s上限
+  log.warn(`バックエンドを${delay}ms後に再起動します(${backendRestartAttempts}/${MAX_BACKEND_RESTARTS})`);
+  if (mainWindow && !mainWindow.isDestroyed()) showSplash('error');
+  backendRestartTimer = setTimeout(() => {
+    backendRestartTimer = null;
+    if (isQuitting || isUpdating) return;
     reclaimPort();
     startPythonServer();
-    if (mainWindow) { showSplash('error'); loadMainApp(); }
-  });
+    if (mainWindow && !mainWindow.isDestroyed()) loadMainApp();
+  }, delay);
 }
 
 function waitForServer(onReady, retries = 60, onTimeout) {
@@ -281,6 +309,7 @@ function loadMainApp() {
   waitForServer(
     () => {
       log.info('バックエンド健全 → 本体を読み込みます');
+      backendRestartAttempts = 0; // 健全化に成功したので再起動カウンタをリセット
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.loadURL(`http://localhost:${PORT}`)
           .catch((e) => { log.error('本体loadURL失敗: ' + e); showSplash('error'); scheduleReload(); });
@@ -304,8 +333,9 @@ function scheduleReload() {
   reloadTimer = setTimeout(() => {
     reloadTimer = null;
     if (isQuitting || isUpdating) return;
-    // バックエンドが落ちていれば掃除して再起動してから読み込む
-    if (!pythonProcess) { reclaimPort(); startPythonServer(); }
+    // バックエンドが落ちている場合は、上限付きの再起動スケジューラに委ねる
+    // （ここで直接起動すると連続失敗の上限を回避してしまうため）
+    if (!pythonProcess) { scheduleBackendRestart(); return; }
     loadMainApp();
   }, delay);
 }
@@ -496,6 +526,7 @@ function setupAutoUpdater() {
         // 参考: electron-userland/electron-builder#1604 (maintainer develarの回答)
         isUpdating = true; // バックエンドのexitで自動再起動しないように
         if (reloadTimer) { clearTimeout(reloadTimer); reloadTimer = null; }
+        if (backendRestartTimer) { clearTimeout(backendRestartTimer); backendRestartTimer = null; }
         setImmediate(() => {
           app.removeAllListeners('window-all-closed');
           // 子プロセス(Pythonバックエンド)をプロセスグループごと確実に終了させてから入れ替え
@@ -524,7 +555,8 @@ function setupAutoUpdater() {
   }
 }
 
-app.whenReady().then(async () => {
+// ロックを取得できたインスタンスだけが起動処理を行う（2つ目は上で app.quit() 済み）
+if (gotSingleInstanceLock) app.whenReady().then(async () => {
   // 新規購入者が何もしなくても自動更新が効くよう、インストール場所を自動修復。
   // translocation解消や/Applicationsへの移動で再起動する場合はここで処理を止める。
   if (handleInstallLocation()) return;
@@ -597,6 +629,9 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
+    // ユーザー操作による再表示なので、諦め状態でも再起動の機会を与える（カウンタリセット）
+    backendRestartAttempts = 0;
+    if (backendRestartTimer) { clearTimeout(backendRestartTimer); backendRestartTimer = null; }
     // バックエンドが落ちていれば掃除して立て直してから読み込む
     if (!pythonProcess) { reclaimPort(); startPythonServer(); }
     createWindow();
@@ -607,6 +642,7 @@ app.on('activate', () => {
 app.on('before-quit', () => {
   isQuitting = true;
   if (reloadTimer) { clearTimeout(reloadTimer); reloadTimer = null; }
+  if (backendRestartTimer) { clearTimeout(backendRestartTimer); backendRestartTimer = null; }
   killBackend();
 });
 

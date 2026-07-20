@@ -46,7 +46,7 @@ try {
 } catch (e) {
   console.error('');
   console.error('❌ 署名鍵がキーチェーンに見つかりません。');
-  console.error('   先に `node tools/keygen.js` を実行してください。');
+  console.error('   先に `node tools/key.js init` を実行してください。');
   console.error('');
   process.exit(1);
 }

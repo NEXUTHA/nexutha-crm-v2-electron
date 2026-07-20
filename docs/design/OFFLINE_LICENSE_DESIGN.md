@@ -123,9 +123,9 @@ NX2-A4K7M-P9RT2-...（全26グループ）
 
 | 項目 | 方法 |
 |---|---|
-| 生成 | `node tools/keygen.js` をオフラインで1回だけ実行 |
+| 生成 | `node tools/key.js init` をオフラインで1回だけ実行 |
 | 保管① | macOSキーチェーン：`security add-generic-password -s nexutha-license-signing -a nexutha -w "<秘密鍵>"` |
-| 保管②（バックアップ） | **紙に印刷 or USBメモリ**に書き出し、**VAULTとは別の場所**に物理保管 |
+| 保管②（バックアップ） | `node tools/key.js backup` で**パスフレーズ付き暗号化ファイル**としてUSBへ直接書き出し。**秘密鍵は画面に一切表示しない**。USBとパスフレーズ(紙)は別々に保管 |
 | リポジトリ | **絶対に入れない**。`.gitignore` に `tools/*.key` `tools/licenses.csv` を追加 |
 | アプリ | **絶対に入れない**（公開鍵のみ同梱） |
 | チャット | **絶対に出力しない**（生成も発行も山下さんが実行し、値は私に見せない） |
@@ -135,10 +135,15 @@ NX2-A4K7M-P9RT2-...（全26グループ）
 ### 発行の手順（山下さんが実行）
 
 ```
-node tools/keygen.js                          # 初回のみ。鍵ペアを作る
+node tools/key.js init                        # 初回のみ。鍵ペアを作る
+node tools/key.js backup                      # USBへ暗号化バックアップ（必須）
 node tools/make-license.js --type master      # 山下さん用（マスターキー）
 node tools/make-license.js --type normal --name "〇〇株式会社"   # 顧客用
 ```
+
+> ★2026-07-20 改訂: 当初この設計書には「`security ... -w` で秘密鍵を表示して控える」
+> 手順を書いていたが、それが実際に漏洩事故を招いた。**秘密鍵を表示する手順・機能は全廃**し、
+> 暗号化バックアップに置き換えた。詳細は `docs/KEY_MANAGEMENT.md`。
 
 出力はキー文字列1行と、`tools/licenses.csv` への追記（通し番号・種別・発行日・宛先）。
 

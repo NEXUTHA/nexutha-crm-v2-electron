@@ -8,3 +8,9 @@ backend/__pycache__/
 backend/data/
 backend/.venv/
 node_modules/
+
+# 台帳 L-01: ライセンス発行の秘密情報・発行台帳（絶対にコミットしない）
+tools/licenses.csv
+tools/*.key
+tools/*.pem
+*.private.json

@@ -18,6 +18,14 @@ log.info('==== アプリ起動 ==== version=' + app.getVersion() + ' isPackaged=
 log.info('実行パス(execPath)=' + process.execPath);
 
 // ================================================================
+// 同梱リソース（index.html / revoked.json 等）の置き場所
+//   配布版: Contents/Resources/   開発版: リポジトリ直下
+// ================================================================
+function frontendBaseDir() {
+  return app.isPackaged ? process.resourcesPath : __dirname;
+}
+
+// ================================================================
 // 多重起動防止（白画面・ポート競合の主因対策）
 //   同じアプリが二重に起動するとバックエンドが2つ立ち上がり、ポート9876の
 //   奪い合い→片方が起動失敗→古い方が応答 or 接続拒否で白画面、という事故が起きる。
@@ -617,6 +625,24 @@ if (gotSingleInstanceLock) app.whenReady().then(async () => {
 
   ipcMain.on("open-ai-window", (event, model) => {
     createAIWindow(model);
+  });
+
+  // 台帳 L-01: ライセンスのオフライン検証。
+  //   以前は画面側が Supabase に問い合わせていたが、サーバー消滅で全ユーザーが
+  //   起動不能になった。公開鍵による署名検証に置き換え、ネットワークを使わない。
+  //   失効リスト(revoked.json)は配布物のルート（配布版=Resources）に置く。
+  ipcMain.handle("verify-license", (event, key) => {
+    try {
+      const { verifyLicense } = require('./license-verify');
+      const r = verifyLicense(key, { baseDir: frontendBaseDir() });
+      log.info(`ライセンス検証: valid=${r.valid}` +
+        (r.reason ? ` reason=${r.reason}` : '') +
+        (r.info ? ` serial=#${r.info.serial} type=${r.info.type}` : ''));
+      return r;
+    } catch (e) {
+      log.error('ライセンス検証で例外: ' + e);
+      return { valid: false, reason: 'internal_error' };
+    }
   });
 
   globalShortcut.register("CommandOrControl+Shift+A", () => {

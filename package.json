@@ -92,12 +92,17 @@
       {
         "from": "version.json",
         "to": "version.json"
+      },
+      {
+        "from": "revoked.json",
+        "to": "revoked.json"
       }
     ],
     "files": [
       "main.js",
       "preload.js",
-      "loading.html"
+      "loading.html",
+      "license-verify.js"
     ],
     "publish": {
       "provider": "github",

@@ -10,7 +10,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isDev: isDev,
   appVersion: appVersion,
   openAI: (model) => ipcRenderer.send('open-ai-window', model),
-  checkForUpdates: () => ipcRenderer.send('check-for-updates')
+  checkForUpdates: () => ipcRenderer.send('check-for-updates'),
+  // 台帳 L-01: ライセンスのオフライン検証を main プロセスに依頼する。
+  // 以前は画面側から Supabase へ fetch していたが、サーバー消滅で全ユーザーが
+  // 起動不能になったため、公開鍵による署名検証（ネットワーク不要）に置き換えた。
+  verifyLicense: (key) => ipcRenderer.invoke('verify-license', key)
 });
 
 // 画面(レンダラ)のJS例外を main.js 経由で electron-log に記録する。

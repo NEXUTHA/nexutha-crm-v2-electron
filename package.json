@@ -74,6 +74,10 @@
         "to": "js"
       },
       {
+        "from": "vendor",
+        "to": "vendor"
+      },
+      {
         "from": "manifest.json",
         "to": "manifest.json"
       },

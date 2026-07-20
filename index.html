@@ -24,13 +24,18 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <link rel="manifest" href="manifest.json">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://api.github.com https://cdnjs.cloudflare.com http://localhost:3456 http://localhost:9876 https://gvaoljanjtgotzjzcfta.supabase.co https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://huggingface.co/mlc-ai/ blob:; font-src 'self' https://fonts.gstatic.com;">
+  <!-- 台帳 N-01: cdnjs をローカル同梱(vendor/)に切り替えたため script-src / default-src から cdnjs を除去。 -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://api.github.com http://localhost:3456 http://localhost:9876 https://gvaoljanjtgotzjzcfta.supabase.co https://zipcloud.ibsnet.co.jp https://raw.githubusercontent.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://huggingface.co/mlc-ai/ blob:; font-src 'self' https://fonts.gstatic.com;">
   <meta name="viewport"  content="width=device-width, initial-scale=1.0">
 <title>NEXUTHA CRM</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- 台帳 N-01: 以前は cdnjs から実行時取得していたが、オフラインだと dexie の読み込み失敗で
+     直下のインラインスクリプト(約4,800行)が丸ごと未定義になりアプリが全損していた。
+     同一バージョンを vendor/ に同梱し、ローカル参照に切り替えた。ネットワーク不要。
+     バージョンを上げるときは vendor/ のファイルを差し替えること（CDNに戻さない）。 -->
+<script src="vendor/dexie.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="vendor/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Josefin+Sans:wght@100;300;400&family=Noto+Serif+JP:wght@300;400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css?v=2.1.2">
 <script>

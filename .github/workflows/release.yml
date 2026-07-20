@@ -168,7 +168,10 @@ jobs:
 
       # 14) GitHubリリースを作成して dmg / zip / latest-mac.yml を添付
       #     （タグはpush済みなのでそのタグにリリースをぶら下げる）
-      - name: GitHubリリースを作成
+      # ★恒久ルール★ リリースは必ず --draft で作成する。ドラフトの間は latest-mac.yml が
+      #   配信されないため顧客の自動更新に乗らない。実機検証に合格し、人間のGOが出てから
+      #   `gh release edit vX.Y.Z --draft=false` で公開すること。CIは絶対に公開まで行わない。
+      - name: GitHubリリースをドラフトで作成
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -178,8 +181,9 @@ jobs:
           NOTES="$(node -p "require('./version.json').notes || ''" 2>/dev/null || echo '')"
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
+            --draft \
             --notes "NEXUTHA CRM v${VERSION}
 
           ${NOTES}" \
             "$DMG" "$ZIP" "$YML"
-          echo "✅ リリース v${VERSION} を公開しました"
+          echo "✅ リリース v${VERSION} をドラフトで作成しました（公開は人間がGO後に --draft=false）"

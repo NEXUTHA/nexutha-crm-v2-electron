@@ -35,7 +35,15 @@ else:
     STATIC_DIR_OVERRIDE = None
 
 # データはアプリ外のユーザーディレクトリに保存
-if getattr(_sys, "frozen", False):
+# 台帳 T-01: 自動テスト用にデータ保存先を差し替えられるようにする。
+#   これが無いと、配布版アプリのE2Eが必ず本番DBを開いてしまい、
+#   「ライセンス未登録のまっさらな状態」を機械的に再現できない
+#   （＝キー無しで入れないことの自動検証ができない）。
+#   通常起動では未設定なので、既存の挙動は一切変わらない。
+_DATA_DIR_OVERRIDE = _os.environ.get("NEXUTHA_DATA_DIR")
+if _DATA_DIR_OVERRIDE:
+    DATA_DIR = Path(_DATA_DIR_OVERRIDE).expanduser()
+elif getattr(_sys, "frozen", False):
     # 配布版: ~/Library/Application Support/NEXUTHA CRM/
     DATA_DIR = Path(_os.path.expanduser("~")) / "Library" / "Application Support" / "NEXUTHA CRM"
 else:

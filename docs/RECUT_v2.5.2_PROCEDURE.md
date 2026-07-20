@@ -134,6 +134,7 @@ gh release download v2.5.2 --dir ~/NEXUTHA_SCRATCH/verify252 --clobber
 | 6 | **`Contents/Resources/vendor/` に4ファイル実在** | dexie / jspdf / autotable / html2canvas |
 | 7 | **`app.asar` に `license-verify.js` が含まれる** | 含まれる（無いと起動不能） |
 | 8 | **`Contents/Resources/revoked.json` が実在** | 実在 |
+| 9 | **配布物の `index.html` の input要素に `maxlength` が無い** | `grep -oE '<input[^>]*maxlength' index.html \| wc -l` が **0**（台帳 L-10 の再発防止。コメント内の言及は除外するため input要素で数える） |
 
 ---
 
@@ -184,7 +185,7 @@ gh release edit v2.5.2 --draft=false
 - [ ] 3. 旧ドラフト・タグの削除
 - [ ] 4. main へマージ → push → CI発火ゼロを実測 → 再タグ
 - [ ] 5. CI完走 → **ドラフトであることと顧客不可視を実証**
-- [ ] 6. 機械確認 8項目
+- [ ] 6. 機械確認 9項目
 - [ ] 7. 実機検証 5基準（山下さんが実施）
 - [ ] 8. 結果報告 → **山下さんのGO**
 - [ ] 9. `--draft=false` で公開

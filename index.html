@@ -86,8 +86,15 @@
     <div style="background:#111;border:1px solid rgba(200,168,75,0.2);border-radius:12px;padding:32px;">
       <div style="font-size:14px;color:#e8e0d0;margin-bottom:8px;font-weight:600;">ライセンスキーを入力してください</div>
       <div style="font-size:12px;color:#7a7060;margin-bottom:20px;">購入時に発行されたキーを入力してください</div>
-      <input type="text" id="license-input" placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX" maxlength="27"
-        style="width:100%;background:#050505;border:1px solid rgba(200,168,75,0.3);color:#e8e0d0;padding:12px 14px;border-radius:6px;font-size:15px;font-family:'Courier New',monospace;box-sizing:border-box;letter-spacing:2px;text-align:center;"
+      <!-- 台帳 L-10 / L-11: 旧形式(27文字)前提の maxlength="27" が残っており、
+           新形式(159文字)のキーを貼り付けると Chromium が挿入を拒否して
+           「ペーストしても何も起きない」状態になっていた。maxlength は削除する。
+           長さ・形式の妥当性は署名検証(license-verify.js)が判断するため、
+           入力欄で文字数を制限する必要はない。
+           あわせて letter-spacing / 中央寄せ / 15px は159文字だと破綻するため、
+           左寄せ・13px・行間ありに変更し、placeholder も新形式にした。 -->
+      <input type="text" id="license-input" placeholder="NXTH2-XXXXX-XXXXX-XXXXX-…"
+        style="width:100%;background:#050505;border:1px solid rgba(200,168,75,0.3);color:#e8e0d0;padding:12px 14px;border-radius:6px;font-size:13px;font-family:'Courier New',monospace;box-sizing:border-box;text-align:left;line-height:1.5;"
         oninput="this.value=this.value.toUpperCase()">
       <div id="license-error" style="color:#f87171;font-size:12px;margin-top:8px;display:none;">ライセンスキーが正しくありません</div>
       <button onclick="submitLicense()" id="license-btn"

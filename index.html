@@ -3023,7 +3023,7 @@ async function loadMemoTemplate() {
 
 async function showItemTemplates() {
   try {
-  const res = await fetch('/api/templates');
+  const res = await fetch(API_BASE + '/templates');
   const templates = await res.json();
   if (!templates.length) {
     showToast('テンプレートがありません。品目を入力後「テンプレに保存」できます');
@@ -3050,7 +3050,7 @@ async function showItemTemplates() {
 
 async function applyTemplate(id) {
   try {
-  const res = await fetch('/api/templates');
+  const res = await fetch(API_BASE + '/templates');
   const all = await res.json();
   const t = all.find(x => x.id === id);
   if (!t) return;
@@ -3072,7 +3072,7 @@ async function saveAsTemplate() {
   const items = window.APP.docItems.filter(i => i.name);
   if (!items.length) { showToast('品目を入力してください'); return; }
   const {total} = calcDocTotal();
-  await fetch('/api/templates', {
+  await fetch(API_BASE + '/templates', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ name, items, notes: document.getElementById('doc-notes')?.value, total })
@@ -3085,7 +3085,7 @@ async function saveAsTemplate() {
 
 async function deleteTemplate(id) {
   try {
-  await fetch('/api/templates/'+id, { method: 'DELETE' });
+  await fetch(API_BASE + '/templates/'+id, { method: 'DELETE' });
   showItemTemplates();
   showToast('削除しました');
 
@@ -3677,7 +3677,7 @@ async function saveDoc() {
 // ================================================================
 async function saveDocVersion(docId, docData) {
   try {
-    const res = await fetch('/api/doc_versions', {
+    const res = await fetch(API_BASE + '/doc_versions', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ doc_id: docId, data: docData })
@@ -3691,7 +3691,7 @@ async function saveDocVersion(docId, docData) {
 
 async function getDocVersions(docId) {
   try {
-    const res = await fetch('/api/doc_versions/' + docId);
+    const res = await fetch(API_BASE + '/doc_versions/' + docId);
     const versions = await res.json();
     return versions;
   } catch(e) {
@@ -5653,7 +5653,7 @@ async function peDeleteDoc() {
   showConfirm('この書類を削除しますか？', async () => {
     try {
       await NAPI.deleteDocument(_previewDocData.id);
-      await fetch('/api/doc_versions/' + _previewDocData.id, { method: 'DELETE' });
+      await fetch(API_BASE + '/doc_versions/' + _previewDocData.id, { method: 'DELETE' });
       closePdfPreview();
       await loadDocuments();
       renderDocuments();
@@ -5800,9 +5800,11 @@ function loadContrast() {
 // NEXUTHA API Bridge Layer
 // IndexedDB → バックエンドAPI への橋渡し
 // ================================================================
-// http(s)で配信されていれば配信元originに自動追従（開発版:3456 / 配布版:9876）。
-// file:// など想定外の開き方をされた場合は配布版backend(9876)にフォールバックして通信を維持する。
-const API_BASE = (location.protocol === 'http:' || location.protocol === 'https:' ? location.origin : 'http://localhost:9876') + '/api';
+// データAPIの宛先。UIは app:// からローカルで読み込むため、宛先は main.js が
+// preload経由で渡す appApiBase を最優先に使う（dev:3456 / 配布:9876 を確実化）。
+// 後方互換: 渡されない場合は http(s)配信元origin、それも無ければ 9876 にフォールバック。
+const API_BASE = ((window.electronAPI && window.electronAPI.appApiBase)
+  || (location.protocol === 'http:' || location.protocol === 'https:' ? location.origin : 'http://localhost:9876')) + '/api';
 const USE_BACKEND = true; // falseにするとIndexedDBモードに戻る
 
 const NAPI = {
@@ -6333,6 +6335,144 @@ async function _dbGetDocuments() {
   return raw.map(r => ({ id: r.id, customer_id: r.customer_id, type: r.type, doc_number: r.doc_number, doc_date: r.doc_date, total: r.total, created_at: r.created_at, ..._decRecord(r) }));
 }
 
+// ================================================================
+// バックエンド(データAPI)接続ゲート＋ヘルス監視
+//   UIは app:// からローカルで即描画される（白画面は構造上出ない）。
+//   データはバックエンド(/api/*)が健全になってから取得する。
+//   未起動・遅延・停止のいずれでも、純粋な白画面ではなく「接続中／再接続中／
+//   エラー＋再試行」を画面内に表示する（古い「再試行中」固定文言は出さない）。
+// ================================================================
+async function nxHealthOk(timeoutMs) {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs || 3000);
+    const r = await fetch(API_BASE + '/health', { signal: ctrl.signal, cache: 'no-store' });
+    clearTimeout(t);
+    return r.ok;
+  } catch (e) { return false; }
+}
+
+function nxCurrentPage() {
+  const a = document.querySelector('.nav-item.active');
+  return a ? a.getAttribute('data-page') : 'dashboard';
+}
+
+// 接続状態オーバーレイ（画面内・半透明。外枠は背後に見える＝白画面ではない）
+function nxShowConn(mode, onRetry) {
+  let ov = document.getElementById('nx-conn-overlay');
+  if (mode === 'hide') { if (ov) ov.style.display = 'none'; return; }
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'nx-conn-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99998;display:flex;align-items:center;justify-content:center;background:rgba(8,8,8,0.78);backdrop-filter:saturate(120%) blur(2px);';
+    ov.innerHTML =
+      '<div style="text-align:center;padding:32px 40px;border:1px solid rgba(201,169,106,0.25);border-radius:14px;background:#0e0e10;max-width:420px;">' +
+      '<div id="nx-conn-spin" style="width:38px;height:38px;margin:0 auto 18px;border:3px solid rgba(201,169,106,0.18);border-top-color:#c9a96a;border-radius:50%;animation:nxspin 0.9s linear infinite;"></div>' +
+      '<div id="nx-conn-msg" style="font-size:14px;color:#e8e8ea;line-height:1.7;"></div>' +
+      '<div id="nx-conn-sub" style="font-size:12px;color:#8a8a90;margin-top:8px;"></div>' +
+      '<button id="nx-conn-retry" style="display:none;margin-top:18px;padding:9px 22px;background:#c9a96a;color:#0e0e10;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">再試行</button>' +
+      '</div>';
+    document.body.appendChild(ov);
+    if (!document.getElementById('nx-spin-style')) {
+      const st = document.createElement('style'); st.id = 'nx-spin-style';
+      st.textContent = '@keyframes nxspin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(st);
+    }
+  }
+  ov.style.display = 'flex';
+  const msg = ov.querySelector('#nx-conn-msg');
+  const sub = ov.querySelector('#nx-conn-sub');
+  const spin = ov.querySelector('#nx-conn-spin');
+  const btn = ov.querySelector('#nx-conn-retry');
+  if (mode === 'connecting') {
+    msg.textContent = 'サーバーに接続しています…';
+    sub.textContent = '起動の準備をしています。少々お待ちください。';
+    spin.style.display = 'block'; btn.style.display = 'none';
+  } else if (mode === 'reconnecting') {
+    msg.textContent = 'サーバーと再接続しています…';
+    sub.textContent = '接続が一時的に切れました。自動で復帰します。';
+    spin.style.display = 'block'; btn.style.display = 'none';
+  } else if (mode === 'error') {
+    msg.textContent = 'サーバーに接続できませんでした';
+    sub.textContent = '通信を確認のうえ「再試行」を押してください。';
+    spin.style.display = 'none'; btn.style.display = 'inline-block';
+    btn.onclick = () => { if (typeof onRetry === 'function') onRetry(); };
+  }
+}
+
+// バックエンドが健全になるまで、バックオフ付き・時間上限付きで待つ。
+//   上限(既定35秒)はmain.js側のバックエンド再起動の打ち切り(約30秒)と整合。
+//   上限到達で false を返し、呼び出し側が「接続できません＋再試行」に切り替える。
+//   ポーリング間隔は 0.5→0.8→1.3→2→3s(上限) のバックオフで、health連打を避ける。
+async function waitForBackend(maxMs) {
+  const limit = maxMs || 35000;
+  let waited = 0, delay = 500;
+  while (waited < limit) {
+    if (await nxHealthOk(2500)) return true;
+    await new Promise(r => setTimeout(r, delay));
+    waited += delay;
+    delay = Math.min(Math.round(delay * 1.6), 3000);
+  }
+  return await nxHealthOk(2500); // 最終確認
+}
+
+// UI先・データ後の初期化本体（再試行ボタンからも再入できる）
+async function bootAfterBackend() {
+  try { showPage('dashboard'); } catch (e) {}   // 先に外枠を描画（データは後）
+  nxShowConn('connecting');
+  const ok = await waitForBackend(35000);        // 約35秒待っても駄目ならエラー＋再試行
+  if (!ok) {
+    nxShowConn('error', () => {
+      // 再試行: main.js にバックエンド再起動を依頼してから、再度待つ
+      try { if (window.electronAPI && window.electronAPI.nxRetry) window.electronAPI.nxRetry(); } catch (e) {}
+      bootAfterBackend();
+    });
+    return;
+  }
+  nxShowConn('hide');
+  startHealthMonitor();   // バックエンドが健全になった後だけ監視を開始（以後の切断を検知）
+  try { await loadCustomers(); } catch (e) {}
+  try { await loadDocuments(); } catch (e) {}
+  const licensed = await checkLicense();
+  if (!licensed) { document.getElementById('license-overlay').style.display = 'flex'; return; }
+  await checkFirstSetup();
+  try { showPage('dashboard'); } catch (e) {}     // データ反映後に再描画
+  setTimeout(backgroundUpdateCheck, 3000);
+  try { showWelcome(); } catch (e) {}
+}
+
+// 起動後にバックエンドが落ちても白画面にせず、再接続表示→復帰でデータ再取得。
+// 一定時間復帰しない（自動再起動も諦めた）場合は「エラー＋再試行」に切り替え、
+// ヘルス監視（health連打）を停止する。再試行ボタンで監視を再開する。
+let nxMonitorTimer = null, nxBackendDown = false, nxDownCount = 0;
+function stopHealthMonitor() { if (nxMonitorTimer) { clearInterval(nxMonitorTimer); nxMonitorTimer = null; } }
+function startHealthMonitor() {
+  if (nxMonitorTimer) return;        // 二重起動防止
+  nxDownCount = 0; nxBackendDown = false;
+  nxMonitorTimer = setInterval(async () => {
+    const ok = await nxHealthOk(2500);
+    if (ok) {
+      nxDownCount = 0;
+      if (nxBackendDown) {
+        nxBackendDown = false; nxShowConn('hide');
+        try { await loadCustomers(); await loadDocuments(); showPage(nxCurrentPage()); } catch (e) {}
+      }
+      return;
+    }
+    // 接続不可
+    nxDownCount++;
+    if (!nxBackendDown) { nxBackendDown = true; nxShowConn('reconnecting', null); }
+    if (nxDownCount >= 6) { // 約30秒復帰しない → 監視を止め、手動「再試行」を提示（health連打を止める）
+      stopHealthMonitor();
+      nxShowConn('error', () => {
+        try { if (window.electronAPI && window.electronAPI.nxRetry) window.electronAPI.nxRetry(); } catch (e) {}
+        nxBackendDown = true; nxShowConn('reconnecting', null);
+        startHealthMonitor();   // 監視を再開（復帰すれば自動でデータ再取得）
+      });
+    }
+  }, 5000);
+}
+
 window.addEventListener('load', async () => {
   // 開発版(npm start)のみDEVバナーを表示。配布版では非表示のまま
   try { if (window.electronAPI && window.electronAPI.isDev) { const _db = document.getElementById('dev-banner'); if (_db) _db.style.display = 'block'; } } catch(e) {}
@@ -6362,28 +6502,11 @@ window.addEventListener('load', async () => {
   setTimeout(hideSplash, 1200);
   setTimeout(hideSplash, 3000);
 
-  // Load data
-  await loadCustomers();
-  await loadDocuments();
-
-  // ライセンス認証チェック
-  const licensed = await checkLicense();
-  if (!licensed) {
-    document.getElementById('license-overlay').style.display = 'flex';
-    return;
-  }
-
-  // 初回セットアップチェック
-  await checkFirstSetup();
-
-  // Show dashboard
-  showPage('dashboard');
-
-  // バックグラウンドでアップデートチェック
-  setTimeout(backgroundUpdateCheck, 3000);
-
-  // Init AI panel
-  showWelcome();
+  // UI先・データ後: バックエンド(データAPI)が健全になってから初期データを読み込む。
+  // バックエンド未起動でも画面は白くならず「接続中」を表示し、準備でき次第データを描画する。
+  // （健全化に成功した時点で bootAfterBackend 内からヘルス監視を開始する。失敗時は
+  //   監視を始めず、health連打を止めて「エラー＋再試行」状態で待機する。）
+  await bootAfterBackend();
 
   // Service Workerは使用しない（登録しない）。旧版の残骸除去は<head>先頭で実施済み。
 });

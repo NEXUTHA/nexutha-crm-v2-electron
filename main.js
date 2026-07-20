@@ -1,10 +1,70 @@
-const { app, BrowserWindow, shell, Menu, dialog, globalShortcut } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, globalShortcut, protocol, net } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const http = require('http');
+const { pathToFileURL } = require('url');
+
+// ================================================================
+// 白画面の構造的根治: UI を HTTP 配信から外し、ローカルから app:// で読む
+//   これまで UI(index.html/js/css) を Python(:9876) が配信していたため、
+//   バックエンドが起動しきるまで画面が空白になる構造だった。
+//   UI をアプリ同梱ファイルから app:// で読み込めば、UIの外枠は常に即描画され、
+//   バックエンドはデータ専用API(/api/*)に格下げできる。白画面は構造上ありえなくなる。
+//   ※ app:// を「標準・セキュア・fetch可」スキームとして登録（whenReady前に必須）。
+//     Service Worker は使わないので allowServiceWorkers は付けない。
+// ================================================================
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }
+]);
+
+// app:// が配信するフロント一式の場所（バックエンドが従来配信していたのと同一の出所）
+//   配布版: Contents/Resources/（extraResources で index.html/js/style.css 等を配置済み）
+//   開発版: プロジェクト直下
+function frontendDir() {
+  return app.isPackaged ? process.resourcesPath : __dirname;
+}
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.htm': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif', '.webp': 'image/webp', '.ico': 'image/x-icon',
+  '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.otf': 'font/otf',
+  '.map': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
+  '.wasm': 'application/wasm'
+};
+
+// app:// のリクエストをローカルファイルに解決して返すハンドラ（whenReady内で登録）
+function registerAppProtocol() {
+  protocol.handle('app', async (request) => {
+    try {
+      const root = frontendDir();
+      const u = new URL(request.url);
+      let rel = decodeURIComponent(u.pathname || '/');
+      if (rel === '/' || rel === '') rel = '/index.html';
+      // パストラバーサル防御: 正規化し、root配下に収まることを保証
+      const safeRel = path.normalize(rel).replace(/^(\.\.[/\\])+/, '');
+      let filePath = path.join(root, safeRel);
+      if (!filePath.startsWith(root)) filePath = path.join(root, 'index.html');
+      if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+        // SPAフォールバック（未知パスは index.html を返す）
+        filePath = path.join(root, 'index.html');
+      }
+      const data = await fs.promises.readFile(filePath);
+      const ext = path.extname(filePath).toLowerCase();
+      const headers = { 'Content-Type': MIME[ext] || 'application/octet-stream' };
+      return new Response(data, { status: 200, headers });
+    } catch (e) {
+      log.error('app://ハンドラ失敗: ' + e);
+      return new Response('Internal Error', { status: 500, headers: { 'Content-Type': 'text/plain' } });
+    }
+  });
+  log.info('app:// プロトコルを登録（フロント配信元=' + frontendDir() + '）');
+}
 
 // ================================================================
 // ログ設定（electron-log）
@@ -251,20 +311,25 @@ function startPythonServer() {
 function scheduleBackendRestart() {
   if (backendRestartTimer || isQuitting || isUpdating) return;
   if (backendRestartAttempts >= MAX_BACKEND_RESTARTS) {
-    log.error(`バックエンドの再起動に${MAX_BACKEND_RESTARTS}回連続で失敗しました。再起動を停止し、エラー画面に切り替えます`);
-    if (mainWindow && !mainWindow.isDestroyed()) showSplash('error');
+    // UI(app://)は既に描画済みで、レンダラ側の接続ゲート/監視が画面内に
+    // 「エラー＋再試行」を表示する。ここでスプラッシュに切り替えると逆に
+    // 生きているUIを潰してしまうため、ログのみ残して再起動を停止する。
+    // （ユーザーが画面内の「再試行」を押すと nx-retry でカウンタがリセットされ再開する）
+    log.error(`バックエンドの再起動に${MAX_BACKEND_RESTARTS}回連続で失敗しました。自動再起動を停止します（画面内の再試行で再開可能）`);
     return;
   }
   backendRestartAttempts++;
   const delay = Math.min(1000 * Math.pow(2, backendRestartAttempts - 1), 15000); // 1,2,4,8,15s上限
   log.warn(`バックエンドを${delay}ms後に再起動します(${backendRestartAttempts}/${MAX_BACKEND_RESTARTS})`);
-  if (mainWindow && !mainWindow.isDestroyed()) showSplash('error');
+  // ※ UI(app://)は再読み込みしない。UIはローカルで生きており、データ取得の可否は
+  //   レンダラ側の接続ゲート/ヘルス監視が画面内に表示する。ここでUIをいじると、
+  //   再起動のたびに接続ゲートが振り出しに戻り「接続中…」が無限ループ＋health連打に
+  //   なる。よってここはバックエンドプロセスの再起動だけを行う。
   backendRestartTimer = setTimeout(() => {
     backendRestartTimer = null;
     if (isQuitting || isUpdating) return;
     reclaimPort();
     startPythonServer();
-    if (mainWindow && !mainWindow.isDestroyed()) loadMainApp();
   }, delay);
 }
 
@@ -303,27 +368,22 @@ function showSplash(mode) {
 }
 
 // ================================================================
-// バックエンドの健全化を待って本体(localhost)を読み込む。
-//   準備できるまではスプラッシュ、タイムアウト時はエラー画面＋再試行。
+// UI を app:// からローカルで読み込む（バックエンドを待たない＝白画面が構造上出ない）。
+//   バックエンドの準備状況は、レンダラ側の接続ゲート(/api/health監視)が扱う。
+//   app:// の読み込み自体に失敗した場合のみ、安全網として再試行する。
 // ================================================================
 function loadMainApp() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  waitForServer(
-    () => {
-      log.info('バックエンド健全 → 本体を読み込みます');
-      backendRestartAttempts = 0; // 健全化に成功したので再起動カウンタをリセット
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.loadURL(`http://localhost:${PORT}`)
-          .catch((e) => { log.error('本体loadURL失敗: ' + e); showSplash('error'); scheduleReload(); });
-      }
-    },
-    60,
-    () => {
-      log.error('バックエンド起動タイムアウト → エラー画面を表示し再試行します');
+  log.info('UIをローカル(app://)から読み込みます');
+  mainWindow.loadURL('app://crm/')
+    .catch((e) => {
+      // ERR_ABORTED(-3) は後続ナビゲーションに置き換えられた正常な中断。失敗扱いしない。
+      const msg = String(e && (e.message || e));
+      if (msg.includes('ERR_ABORTED')) { log.info('app:// 読み込みが中断(後続ナビゲーション)。無視'); return; }
+      log.error('app:// 読み込み失敗: ' + msg);
       showSplash('error');
       scheduleReload();
-    }
-  );
+    });
 }
 
 // 読み込み失敗時に指数バックオフで再読み込みを予約（永久白画面の防止）
@@ -351,38 +411,46 @@ function createWindow() {
     height: 900,
     minWidth: 800,
     minHeight: 600,
+    backgroundColor: '#0e0e10',   // 描画前でも白くならないようUIと同じ暗色を初期背景に
     title: app.isPackaged ? 'NEXUTHA CRM' : 'NEXUTHA CRM DEV',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      additionalArguments: [`--nexutha-isdev=${!app.isPackaged}`, `--nexutha-version=${app.getVersion()}`],
+      additionalArguments: [
+        `--nexutha-isdev=${!app.isPackaged}`,
+        `--nexutha-version=${app.getVersion()}`,
+        `--nexutha-apibase=http://localhost:${PORT}`,
+      ],
     },
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 16 },
   });
 
 
-  // まず同梱のスプラッシュを即表示（純粋な白画面を出さない）。
-  // バックエンドが健全になってから loadMainApp() で本体(localhost)へ差し替える。
-  showSplash('loading');
+  // UIは app:// からローカルで即読み込む（白画面は構造上出ない）。背景色を暗色にして
+  // あるため描画前でも白くならない。起動時スプラッシュは使わず、app:// 読み込み自体が
+  // 失敗した時だけ loading.html#error を出す（安全網）。
+  //   ※ 起動時に loadFile(splash) と loadURL(app://) を二重に走らせると互いを
+  //     ERR_ABORTED で中断し合い、誤判定でスプラッシュとapp://が交互に切り替わる不具合が出た。
+  //     そのため起動時の事前スプラッシュは行わない。
   if (!app.isPackaged) mainWindow.webContents.openDevTools(); // 開発時のみ
 
-  // 読み込み失敗を捕捉して自動復帰（永久白画面の防止）
+  // UI(app://)の読み込み失敗を捕捉して自動復帰（永久白画面の防止・安全網）
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDesc, validatedURL, isMainFrame) => {
     if (errorCode === -3) return; // ERR_ABORTED（loadURL差し替え時の正常な中断）は無視
     if (!isMainFrame) return;
-    // スプラッシュ等のローカルファイル読み込み失敗は対象外
-    if (!validatedURL || !validatedURL.startsWith('http://localhost')) return;
-    log.error(`本体読み込み失敗 code=${errorCode} desc=${errorDesc} url=${validatedURL}`);
+    // 対象は app:// 本体の読み込み失敗のみ（スプラッシュ等のローカルfileは対象外）
+    if (!validatedURL || !validatedURL.startsWith('app://')) return;
+    log.error(`UI(app://)読み込み失敗 code=${errorCode} desc=${errorDesc} url=${validatedURL}`);
     showSplash('error');
     scheduleReload();
   });
 
   mainWindow.webContents.on('did-finish-load', () => {
     const url = mainWindow.webContents.getURL();
-    if (url && url.startsWith(`http://localhost:${PORT}`)) {
+    if (url && url.startsWith('app://')) {
       reloadAttempts = 0; // 成功したのでバックオフをリセット
-      log.info('アプリ本体の読み込み完了');
+      log.info('UI(app://)の読み込み完了');
     }
   });
 
@@ -582,6 +650,9 @@ if (gotSingleInstanceLock) app.whenReady().then(async () => {
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
+  // app:// プロトコル（UIのローカル配信）を登録
+  registerAppProtocol();
+
   // 2つ目の起動が来たら既存ウィンドウを前面に出す
   app.on('second-instance', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -590,13 +661,14 @@ if (gotSingleInstanceLock) app.whenReady().then(async () => {
     }
   });
 
-  // 起動順: ポート掃除 → ウィンドウ(スプラッシュ即表示) → バックエンド起動 →
-  //         自動更新設定 → 健全化を待って本体読み込み。
+  // 起動順: ポート掃除 → ウィンドウ(スプラッシュ即表示) → UIをapp://で即読み込み →
+  //         バックエンド起動(データ用) → 自動更新設定。
+  //   UIはバックエンドを待たずに描画され、データ取得はレンダラの接続ゲートが扱う。
   reclaimPort();
-  createWindow();      // スプラッシュを即表示（白画面を出さない）
-  startPythonServer();
+  createWindow();      // 暗色背景のウィンドウを生成（描画前でも白くならない）
+  loadMainApp();       // app://crm/ を即読み込み（バックエンド非依存・UIは即描画）
+  startPythonServer(); // データ専用API（/api/*）を起動
   setupAutoUpdater();
-  loadMainApp();       // /api/health 200 を待って localhost を読み込み
 
   // Cmd+Option+I でDevToolsを開閉
   globalShortcut.register('CommandOrControl+Alt+I', () => {
@@ -617,6 +689,23 @@ if (gotSingleInstanceLock) app.whenReady().then(async () => {
 
   ipcMain.on("open-ai-window", (event, model) => {
     createAIWindow(model);
+  });
+
+  // 「再試行」要求（スプラッシュのエラー画面 or 画面内の接続エラーから）。
+  //   バックエンドが落ちていれば掃除して再起動し、再試行カウンタをリセット。
+  //   UIがスプラッシュ等(app://以外)を表示中なら app:// を読み直す。
+  ipcMain.on("nx-retry", () => {
+    if (isQuitting || isUpdating) return;
+    log.info('再試行要求(nx-retry)を受信');
+    reloadAttempts = 0;
+    backendRestartAttempts = 0;
+    if (reloadTimer) { clearTimeout(reloadTimer); reloadTimer = null; }
+    if (backendRestartTimer) { clearTimeout(backendRestartTimer); backendRestartTimer = null; }
+    if (!pythonProcess) { reclaimPort(); startPythonServer(); }
+    try {
+      const url = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents.getURL() : '';
+      if (!url || !url.startsWith('app://')) loadMainApp();
+    } catch (e) { log.warn('nx-retry時のURL確認失敗: ' + e); }
   });
 
   globalShortcut.register("CommandOrControl+Shift+A", () => {

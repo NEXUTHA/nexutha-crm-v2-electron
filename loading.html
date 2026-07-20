@@ -2,7 +2,10 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
+  <!-- 完全ローカルな静的スプラッシュ。外部リソース読込・fetch・ユーザー入力表示は一切なし。
+       自身のインラインstyle/scriptのみ動かせれば良いので 'unsafe-inline' を許可（注入経路が無く安全）。
+       index.html(:27) のCSPとは別物・独立。 -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:;">
   <title>NEXUTHA CRM</title>
   <style>
     :root { --gold:#c9a96a; --bg:#0e0e10; --text:#e8e8ea; --text2:#9a9aa0; }
@@ -25,10 +28,16 @@
       animation:spin 0.9s linear infinite;
     }
     @keyframes spin { to { transform:rotate(360deg); } }
-    .msg { font-size:14px; color:var(--text2); line-height:1.7; }
-    .sub { font-size:12px; color:#6a6a70; margin-top:10px; }
-    /* エラー時 */
-    .err-icon { font-size:34px; margin-bottom:18px; }
+    .msg { font-size:14px; color:var(--text); line-height:1.7; }
+    .sub { font-size:12px; color:var(--text2); margin-top:10px; }
+    .err-icon { font-size:30px; margin-bottom:14px; color:var(--gold); }
+    .retry-btn {
+      -webkit-app-region:no-drag;
+      margin-top:22px; padding:10px 26px;
+      background:var(--gold); color:var(--bg);
+      border:none; border-radius:8px;
+      font-size:13px; font-weight:600; cursor:pointer;
+    }
     #loading-view, #error-view { display:none; }
     body.mode-loading #loading-view { display:block; }
     body.mode-error #error-view { display:block; }
@@ -43,9 +52,10 @@
       <div class="sub">少々お待ちください</div>
     </div>
     <div id="error-view">
-      <div class="spinner"></div>
-      <div class="msg">起動の準備をしています…</div>
-      <div class="sub">接続を再試行しています。このままお待ちください。</div>
+      <div class="err-icon">!</div>
+      <div class="msg">起動に失敗しました</div>
+      <div class="sub">画面を読み込めませんでした。下のボタンで再試行してください。</div>
+      <button id="retry-btn" class="retry-btn">再試行</button>
     </div>
   </div>
   <script>
@@ -55,6 +65,17 @@
       document.body.className = (mode === 'error') ? 'mode-error' : 'mode-loading';
     }
     window.addEventListener('hashchange', applyMode);
+    // 「再試行」: main.js に再読み込みを依頼（preload経由のelectronAPI）
+    document.getElementById('retry-btn').addEventListener('click', function () {
+      try {
+        if (window.electronAPI && typeof window.electronAPI.nxRetry === 'function') {
+          window.electronAPI.nxRetry();
+        }
+      } catch (e) {}
+      // 押下後は待機表示に戻す（main.jsが再読み込みを実行）
+      location.hash = '#loading';
+      applyMode();
+    });
     applyMode();
   </script>
 </body>

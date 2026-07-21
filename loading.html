@@ -2,7 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
+  <!-- 台帳 L-15: 旧CSPは script-src を欠いており、エラー画面の「再試行」ボタンの
+       インラインスクリプト(下部)が default-src 'none' で弾かれて動かなかった
+       ＝起動失敗時にユーザーが再試行できず詰む。script-src 'unsafe-inline' を追加。
+       このファイルは外部リソースを一切読まない静的スプラッシュなので注入経路は無い。 -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:;">
   <title>NEXUTHA CRM</title>
   <style>
     :root { --gold:#c9a96a; --bg:#0e0e10; --text:#e8e8ea; --text2:#9a9aa0; }

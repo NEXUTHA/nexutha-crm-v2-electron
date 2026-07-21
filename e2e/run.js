@@ -43,7 +43,15 @@ async function clean() {
   await win.waitForTimeout(6000);
   rec('正規NXTH2キーで認証通過', !(await H.licenseVisible(win)));
 
-  // ⑤ クリック可能性
+  // ④.5 新規環境では初回セットアップ画面が出る。ボタンで閉じられること（正常フロー）を検証。
+  const setupShown = await win.evaluate(() => getComputedStyle(document.getElementById('setup-overlay')).display !== 'none');
+  rec('新規環境で初回セットアップ画面が出る', setupShown);
+  await win.evaluate(() => { if (typeof skipSetup === 'function') skipSetup(); });
+  await win.waitForTimeout(1500);
+  rec('セットアップを閉じられる（ボタンのonclickが動く）',
+    await win.evaluate(() => getComputedStyle(document.getElementById('setup-overlay')).display === 'none'));
+
+  // ⑤ クリック可能性（オーバーレイを閉じた後）
   const cl = await H.probeClickable(win);
   rec('全UIがクリック実測で反応', cl.total > 0 && cl.clickable === cl.total, `${cl.clickable}/${cl.total} 命中, 覆う要素=${cl.covering.length}`);
 
@@ -53,7 +61,7 @@ async function clean() {
     await win.click('.nav-item[data-page="customers"]'); await win.waitForTimeout(1200);
     await win.evaluate(() => openAddModal());
     await win.waitForTimeout(800);
-    await win.fill('#c-name', 'E2ETESTCUSTOMER');
+    await win.fill('#f-name', 'E2ETESTCUSTOMER');
     await win.evaluate(() => _execSaveCustomer());
     await win.waitForTimeout(2500);
     flow.customer = await win.evaluate(() => (window.APP.customers||[]).some(c=>c.name==='E2ETESTCUSTOMER'));
@@ -121,6 +129,8 @@ async function offline() {
   rec('オフラインでも起動する（白画面でない）', await win.evaluate(() => document.querySelectorAll('body *').length > 50));
   await win.fill('#license-input', key); await win.click('#license-btn'); await win.waitForTimeout(6000);
   rec('オフラインで認証を通過', !(await H.licenseVisible(win)));
+  await win.evaluate(() => { if (typeof skipSetup === 'function') skipSetup(); });
+  await win.waitForTimeout(1500);
   const libs = await win.evaluate(() => ({d: typeof Dexie, j: typeof window.jspdf, h: typeof html2canvas}));
   rec('ライブラリがローカルで解決（CDN不要）', libs.d!=='undefined' && libs.j!=='undefined' && libs.h!=='undefined', JSON.stringify(libs));
   const cl = await H.probeClickable(win);
@@ -129,8 +139,26 @@ async function offline() {
   await app.close();
 }
 
+async function corrupt() {
+  console.log('\n=== ストレージ破損フィクスチャ ===');
+  const d = H.freshDirs('corrupt');
+  const lsDir = path.join(d.profile, 'Local Storage', 'leveldb');
+  fs.mkdirSync(lsDir, { recursive: true });
+  fs.writeFileSync(path.join(lsDir, 'CURRENT'), 'GARBAGE_NOT_A_MANIFEST\n');
+  fs.writeFileSync(path.join(lsDir, '000003.log'), Buffer.from([0xde,0xad,0xbe,0xef,0,1,2,3,255,254]));
+  fs.writeFileSync(path.join(lsDir, 'MANIFEST-000001'), Buffer.from([0xff,0xff,0xff]));
+  const { app, win, errors } = await H.launch(d);
+  await win.waitForTimeout(9000);
+  rec('破損Local Storageでも起動する（白画面でない）',
+    await win.evaluate(() => document.querySelectorAll('body *').length > 50).catch(() => false));
+  rec('localStorageが自動再作成され書き込める',
+    await win.evaluate(() => { try { localStorage.setItem('__t','1'); return localStorage.getItem('__t')==='1'; } catch(e){ return false; } }) === true);
+  rec('破損フィクスチャでJS例外ゼロ', errors.filter(e => !e.includes("default-src 'none'")).length === 0);
+  await app.close();
+}
+
 (async () => {
-  await clean(); await legacy(); await offline();
+  await clean(); await legacy(); await offline(); await corrupt();
   const ng = results.filter(r=>!r.ok);
   console.log(`\n=== 結果: ${results.length - ng.length}/${results.length} 合格 ===`);
   if (ng.length) { console.log('不合格:'); ng.forEach(r=>console.log('  🔴', r.name, r.detail)); process.exit(1); }

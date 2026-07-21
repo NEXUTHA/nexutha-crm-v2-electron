@@ -8,7 +8,7 @@ const F = require('../tools/license-format');
 
 // 検証対象アプリ。NEXUTHA_APP_BIN で差し替え可能（ドラフト成果物を直接検証するため）
 const APP_BIN = process.env.NEXUTHA_APP_BIN || '/Applications/NEXUTHA CRM.app/Contents/MacOS/NEXUTHA CRM';
-const SCRATCH = path.join(process.env.HOME, 'NEXUTHA_SCRATCH', 'e2e');
+const SCRATCH = path.join(process.env.HOME, 'nexutha-e2e-work', 'runs');
 
 // 実鍵で署名した本物のキーを作る（テスト用。キーチェーンから読むが値は出力しない）
 function issueKey(type = 'normal', serial = 9001, days = 0) {

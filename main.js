@@ -84,6 +84,11 @@ function handleInstallLocation() {
   try {
     if (!app.isPackaged) return false; // 開発版は対象外（誤ってmove等しない）
     if (process.platform !== 'darwin') return false;
+    // 台帳 T-01: E2E は /Applications の外でパッケージ版を起動するため、
+    //   ここで moveToApplicationsFolder が走るとアプリが自分自身を移動し、
+    //   テスト対象の .app が消えてしまう。テスト時のみ場所修復を無効化する。
+    //   （通常起動では未設定なので購入者の自動修復挙動は一切変わらない）
+    if (process.env.NEXUTHA_SKIP_INSTALL_CHECK === '1') return false;
 
     const flagFile = path.join(app.getPath('userData'), 'install-repair-attempted.txt');
     const translocated = isTranslocated();

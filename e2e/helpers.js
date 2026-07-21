@@ -36,7 +36,7 @@ async function launch({ profile, data, extraEnv = {} }) {
   const app = await electron.launch({
     executablePath: APP_BIN,
     args: [`--user-data-dir=${profile}`],
-    env: { ...process.env, NEXUTHA_DATA_DIR: data, ...extraEnv },
+    env: { ...process.env, NEXUTHA_DATA_DIR: data, NEXUTHA_SKIP_INSTALL_CHECK: '1', ...extraEnv },
     timeout: 90000,
   });
   const win = await app.firstWindow({ timeout: 90000 });
